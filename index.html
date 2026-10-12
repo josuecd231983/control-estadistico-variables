@@ -124,6 +124,30 @@ details.acc>div{padding:0 1rem 1rem}
 ol.refs{font-family:var(--serif);padding-left:1.4rem}
 ol.refs li{margin:.5rem 0}
 @media (prefers-reduced-motion:no-preference){.btn{transition:filter .15s}}
+.po{display:none}
+.phead h1{font-size:1.4rem}.phead p{margin:.2rem 0;color:var(--ink2)}
+@media print{
+ @page{size:letter;margin:13mm}
+ :root:root:root{--bg:#fff;--surface:#fff;--surface2:#EEF2F4;--ink:#10232A;--ink2:#4A5F68;--line:#C9D5DA;--grid:#E1E8EB;--accent:#1B5E8C;--accentInk:#fff;--accentSoft:#DCEAF3;--ok:#1E7B4A;--okSoft:#DDF0E5;--warn:#8F5A00;--warnSoft:#F8EBCB;--bad:#B3341F;--badSoft:#F7DDD7;color-scheme:light}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body{background:#fff;color:var(--ink);font-size:10.5px}
+ .wrap{max-width:none;padding:0}
+ .noprint,.nav,.top{display:none!important}
+ .po{display:block}
+ .sec{margin-top:16px}
+ h2{font-size:1.15rem}
+ .chart,.card,.banner,.tile,.verdict,details.acc,tr,.fx{break-inside:avoid}
+ .sec>.sh,h3,h4{break-after:avoid}
+ .chart{overflow:visible}.chart svg{min-width:0}
+ .scroll,.cscroll{overflow:visible;max-height:none}
+ table.ct th{position:static}
+ table.dt input{border:0;background:none;padding:0;width:auto;text-align:right;font:inherit;font-family:var(--mono)}
+ table.dt input.lab{text-align:left}
+ table.dt input[type=checkbox]{width:auto}
+ button.x{display:none}
+ #capacidad{break-before:page}
+ body:not(.pr-theory) #teoria,body:not(.pr-theory) #refs{display:none}
+}
 </style>
 </head><body>
 <div class="wrap">
@@ -138,13 +162,21 @@ ol.refs li{margin:.5rem 0}
  <a href="#datos">1 Datos</a><a href="#eleccion">2 Elección</a><a href="#graficos">3 Gráficos</a><a href="#capacidad">4 Capacidad</a><a href="#teoria">Fundamentos</a><a href="#refs">Referencias</a>
 </nav>
 
+<div class="row noprint" style="margin-top:12px">
+ <button class="btn" id="btnPdf" type="button">Descargar informe en PDF</button>
+ <label class="row note"><input type="checkbox" id="pdfBoth"> Incluir ambos gráficos (X̄-R y X̄-S)</label>
+ <label class="row note"><input type="checkbox" id="pdfTheory"> Incluir fundamentos y bibliografía</label>
+</div>
+<p class="note noprint" id="pdfMsg">Se abre el cuadro de impresión del navegador: elija «Guardar como PDF» como destino. Funciona en la página publicada en GitHub; la vista previa dentro de Claude no permite imprimir.</p>
+<div class="po" id="printHead"></div>
+
 <section class="sec" id="datos">
  <div class="sh"><span class="step">Paso 1</span><h2>Captura de datos</h2></div>
- <div id="exBanner" class="banner" hidden></div>
- <div class="card">
+ <div id="exBanner" class="banner noprint" hidden></div>
+ <div class="card noprint">
   <div class="fields">
-   <label class="f">Variable<input id="variable" type="text"></label>
-   <label class="f">Unidad<input id="unit" type="text"></label>
+   <label class="f">Variable<input id="variable" type="text" placeholder="Nombre de la variable"></label>
+   <label class="f">Unidad<input id="unit" type="text" placeholder="in, mm, g…"></label>
    <label class="f">Tamaño de subgrupo n (2 a 25)<input id="nInput" type="number" min="2" max="25" step="1"></label>
    <label class="f">Decimales mostrados<input id="dec" type="number" min="1" max="6" step="1"></label>
   </div>
@@ -159,20 +191,21 @@ ol.refs li{margin:.5rem 0}
    <button class="btn" id="btnAdd" type="button">Agregar subgrupo</button>
    <button class="btn sec2" id="btnExample" type="button">Cargar ejemplo PVC</button>
    <button class="btn sec2" id="btnPasteToggle" type="button">Pegar desde Excel</button>
-   <button class="btn dng" id="btnClear" type="button">Limpiar</button>
+   <button class="btn dng" id="btnClear" type="button">Nuevo ejercicio (borrar todo)</button>
   </div>
   <div id="pastePanel" hidden style="margin-top:12px">
    <label class="f">Una fila por subgrupo; columnas separadas por tabulador, punto y coma, coma o espacio
     <textarea id="pasteTxt" rows="6" style="font-family:var(--mono)" placeholder="06:00&#9;15.9&#9;27.5&#9;22.7&#10;07:00&#9;22.5&#9;22.8&#9;20.3"></textarea></label>
    <div class="row" style="margin-top:8px">
     <label class="row note"><input type="checkbox" id="pasteLabel"> La primera columna es una etiqueta o número de subgrupo</label>
+    <label class="row note"><input type="checkbox" id="pasteKeep"> Conservar variable, unidad y especificaciones actuales</label>
     <button class="btn" id="btnImport" type="button">Importar y reemplazar datos</button>
    </div>
   </div>
  </div>
  <div class="scroll" style="margin-top:12px"><table class="dt" id="tbl"></table></div>
- <p class="note">Solo se usan subgrupos completos. Marque «Excl.» para sacar un subgrupo del cálculo de los límites cuando haya identificado una causa asignable; seguirá visible en las gráficas con marcador hueco.</p>
- <div class="row"><button class="btn sec2" id="btnAutoEx" type="button">Excluir subgrupos fuera de control y recalcular</button><span class="note" id="autoExMsg"></span></div>
+ <p class="note noprint">Solo se usan subgrupos completos. Marque «Excl.» para sacar un subgrupo del cálculo de los límites cuando haya identificado una causa asignable; seguirá visible en las gráficas con marcador hueco.</p>
+ <div class="row noprint"><button class="btn sec2" id="btnAutoEx" type="button">Excluir subgrupos fuera de control y recalcular</button><span class="note" id="autoExMsg"></span></div>
  <h3>Estadísticos globales</h3>
  <p class="note">Notación: <b>n</b> = observaciones dentro de cada subgrupo (tamaño de muestra); <b>k</b> = número de subgrupos tomados; <b>n·k</b> = total de observaciones.</p>
  <div class="tiles" id="gstats"></div>
@@ -185,7 +218,7 @@ ol.refs li{margin:.5rem 0}
 
 <section class="sec" id="graficos">
  <div class="sh"><span class="step">Paso 3</span><h2>Gráficos de control</h2></div>
- <div class="row" style="margin-bottom:12px">
+ <div class="row noprint" style="margin-bottom:12px">
   <b class="note">Gráfico a mostrar</b>
   <div class="seg" id="seg" role="group" aria-label="Gráfico a mostrar">
    <button type="button" data-view="R" aria-pressed="true">X̄-R</button>
@@ -193,7 +226,7 @@ ol.refs li{margin:.5rem 0}
   </div>
   <span class="note" id="segHint"></span>
  </div>
- <div class="card">
+ <div class="card noprint">
   <div class="row">
    <label class="row note"><input type="checkbox" id="zones" checked> Mostrar zonas de 1σ y 2σ</label>
   </div>
@@ -215,10 +248,10 @@ ol.refs li{margin:.5rem 0}
 
 <section class="sec" id="capacidad">
  <div class="sh"><span class="step">Paso 4</span><h2>Análisis de capacidad del proceso</h2></div>
- <div class="card"><label class="f" style="max-width:340px">Estimador de σ dentro de subgrupos
+ <div class="card noprint"><label class="f" style="max-width:340px">Estimador de σ dentro de subgrupos
   <select id="method"><option value="auto">Automático (el gráfico que esté mostrando)</option><option value="R">R̄ / d₂ (gráfico X̄-R)</option><option value="S">S̄ / c₄ (gráfico X̄-S)</option></select></label></div>
  <div id="capOut"></div>
- <div class="row" style="margin-top:12px"><button class="btn sec2" id="btnCopy" type="button">Copiar resumen de resultados</button><span class="note" id="copyMsg"></span></div>
+ <div class="row noprint" style="margin-top:12px"><button class="btn sec2" id="btnCopy" type="button">Copiar resumen de resultados</button><span class="note" id="copyMsg"></span></div>
  <textarea id="sumBox" class="sumbox" hidden readonly aria-label="Resumen para copiar"></textarea>
 </section>
 
@@ -424,7 +457,7 @@ function histSVG(c,A){
  if(Number.isFinite(c.T))s+=V(c.T,'tg','T',12);
  s+=V(c.mu,'mu','μ̂',0);
  niceTicks(lo,hi,8).forEach(t=>{s+='<text x="'+X(t)+'" y="'+(H-mB+16)+'" text-anchor="middle">'+tickFmt(t,S.dec)+'</text>';});
- s+='<text x="'+(mL+pw/2)+'" y="'+(H-8)+'" text-anchor="middle">'+esc(S.variable)+(S.unit?' ('+esc(S.unit)+')':'')+'</text></svg>';
+ s+='<text x="'+(mL+pw/2)+'" y="'+(H-8)+'" text-anchor="middle">'+esc(S.variable||'Observaciones')+(S.unit?' ('+esc(S.unit)+')':'')+'</text></svg>';
  return '<div class="chart">'+s+'</div>';}
 
 const RULETXT={1:'un punto fuera de los límites de control (±3σ)',2:'9 puntos consecutivos del mismo lado de la línea central',3:'6 puntos consecutivos en ascenso o descenso',4:'14 puntos consecutivos alternando arriba y abajo',5:'2 de 3 puntos consecutivos más allá de 2σ, del mismo lado',6:'4 de 5 puntos consecutivos más allá de 1σ, del mismo lado'};
@@ -464,7 +497,7 @@ function renderVerdict(){
   +'<tr><td>Eficiencia estadística con n = '+A.n+'</td><td>'+(A.n<=5?'Alta (casi igual a S)':A.n<=10?'Decreciente':'Baja')+'</td><td>Alta y estable al crecer n</td></tr>'
   +'<tr><td>Cálculo manual</td><td>Sencillo</td><td>Más laborioso</td></tr>'
   +'<tr><td>Puntos señalados (dispersión + medias)</td><td class="m">'+nR+'</td><td class="m">'+nS+'</td></tr></tbody></table></div>';
- h+='<div class="row" style="margin-top:12px"><button type="button" class="btn" data-view="'+r.pick+'">Ver gráficos '+pick+'</button><button type="button" class="btn sec2" data-view="'+r.alt+'">Ver gráficos '+alt+'</button></div>';
+ h+='<div class="row noprint" style="margin-top:12px"><button type="button" class="btn" data-view="'+r.pick+'">Ver gráficos '+pick+'</button><button type="button" class="btn sec2" data-view="'+r.alt+'">Ver gráficos '+alt+'</button></div>';
  h+='<p class="note">Los dos estimadores de σ difieren '+dif.toFixed(1)+' %. '+(dif>10?'Una discrepancia marcada puede indicar valores atípicos dentro de los subgrupos o falta de normalidad; es una señal diagnóstica, no una prueba formal.':'La coincidencia es razonable.')+' Alternativa válida: '+alt+'.</p>';
  h+='<div class="scroll"><table><thead><tr><th>Tamaño de subgrupo</th><th>Gráfico habitual</th><th>Razón</th></tr></thead><tbody><tr><td>n = 2 a 5</td><td>X̄-R</td><td>Rango casi tan eficiente como S; simple</td></tr><tr><td>n = 6 a 10</td><td>X̄-R o X̄-S</td><td>Ambos aceptables; S algo más eficiente</td></tr><tr><td>n &gt; 10</td><td>X̄-S</td><td>El rango pierde eficiencia (Montgomery, 2019)</td></tr></tbody></table></div>';
  el.innerHTML=h;}
@@ -499,7 +532,7 @@ function renderChartSec(key){
  const lab=A.rows.map(r=>r.label),ex=A.rows.map(r=>r.ex),un=S.unit?' ('+S.unit+')':'';
  let h=chartSVG({title:'Gráfico X̄ — media de cada subgrupo',labels:lab,values:A.rows.map(r=>r.mean),flags:fm,ex,cl:L.cl,ucl:L.ucl,lcl:L.lcl,sigma:L.sigma,zones:S.zones,ylab:'Media'+un});
  h+=chartSVG({title:isR?'Gráfico R — rango de cada subgrupo':'Gráfico S — desviación estándar de cada subgrupo',labels:lab,values:A.rows.map(r=>isR?r.R:r.s),flags:fd,ex,cl:D.cl,ucl:D.ucl,lcl:D.lcl,sigma:D.sigma,zones:false,floor0:true,hideLcl:D.lcl===0&&false,ylab:(isR?'Rango':'Desv. est.')+un});
- out.innerHTML=h+limitsTable(key)+interp(key);}
+ out.innerHTML='<h3 class="po">Gráficos X̄-'+key+'</h3>'+h+limitsTable(key)+interp(key);}
 
 function cls(x){return x>=2?['Clase mundial','ok']:x>=1.33?['Adecuado','ok']:x>=1?['Parcialmente adecuado','warn']:x>=0.67?['No adecuado','bad']:['No adecuado, grave','bad'];}
 function viewUsed(){return S.view||(A?A.rec.pick:'R');}
@@ -534,7 +567,9 @@ function renderCap(){
  if(c.err==='sigma0'){out.innerHTML='<div class="banner bad">La variabilidad estimada es cero; revise los datos.</div>';return;}
  const dk=m==='R'?'r':'s',mk=m==='R'?'xr':'xs',stable=activeFlags(A,dk)+activeFlags(A,mk)===0;
  const chk=(t,ok,w)=>'<tr><td>'+t+'</td><td><span class="badge '+(ok?'ok':w?'warn':'bad')+'">'+(ok?'Cumple':'Revisar')+'</span></td></tr>';
- let h='<div class="banner'+(stable?' ok':' bad')+'">'+(stable?'El proceso está en control estadístico con el gráfico X̄-'+m+': los índices tienen sentido como medida de capacidad.':'El proceso no está en control con el gráfico X̄-'+m+'. Los índices describen un proceso inestable y no deben usarse para predecir su desempeño (Montgomery, 2019). Corrija las causas asignables en el paso 3.')+'</div>';
+ let h='';
+ if((c.hasL&&c.mu<c.lsl)||(c.hasU&&c.mu>c.usl))h+='<div class="banner warn"><b>Revise las especificaciones.</b> La media estimada ('+f(c.mu)+') queda fuera de los límites capturados ('+(c.hasL?'LIE = '+f(c.lsl):'sin LIE')+'; '+(c.hasU?'LSE = '+f(c.usl):'sin LSE')+'). Verifique que correspondan a este ejercicio y no a uno anterior; se editan en el paso 1.</div>';
+ h+='<div class="banner'+(stable?' ok':' bad')+'">'+(stable?'El proceso está en control estadístico con el gráfico X̄-'+m+': los índices tienen sentido como medida de capacidad.':'El proceso no está en control con el gráfico X̄-'+m+'. Los índices describen un proceso inestable y no deben usarse para predecir su desempeño (Montgomery, 2019). Corrija las causas asignables en el paso 3.')+'</div>';
  h+='<div class="cards">'+capCard('Cp','capacidad potencial',c.Cp,c.CpLo,c.CpHi,'Compara la tolerancia con 6σ; ignora si el proceso está centrado.')
   +capCard('Cpk','capacidad real',c.Cpk,c.CpkLo,c.CpkHi,'Toma el lado más cercano a su especificación: min(Cpu, Cpl).')
   +capCard('Cpm','capacidad respecto al objetivo',c.Cpm,NaN,NaN,Number.isFinite(c.Cpm)?'Penaliza alejarse de T = '+f(c.T)+' (función de pérdida de Taguchi).':'Requiere LIE y LSE.')+'</div>';
@@ -654,6 +689,7 @@ function importPaste(){
   const vals=tk.filter(isN);if(vals.length>=2)parsed.push({label:lab,v:vals});});
  if(!parsed.length){$('autoExMsg').textContent='No se encontraron filas con al menos dos valores numéricos.';return;}
  const n=Math.min(25,Math.max(2,parsed[0].v.length));
+ if(!$('pasteKeep').checked){S.variable='';S.unit='';S.lsl='';S.tgt='';S.usl='';S.view='';}
  S.n=n;S.rows=parsed.filter(p=>p.v.length>=n).map((p,i)=>({label:p.label||String(i+1),v:p.v.slice(0,n),ex:false}));
  S.example=false;$('pastePanel').hidden=true;$('autoExMsg').textContent='';syncControls();renderTable();update();}
 
@@ -682,7 +718,7 @@ function bind(){
  $('btnAdd').addEventListener('click',()=>{S.rows.push({label:String(S.rows.length+1),v:Array(S.n).fill(''),ex:false});touch();renderTable();update();
   const inp=tbl.querySelector('tr:last-child input.v');if(inp)inp.focus();});
  $('btnExample').addEventListener('click',()=>{S=JSON.parse(JSON.stringify(EXAMPLE));syncControls();renderTable();update();});
- $('btnClear').addEventListener('click',()=>{S.rows=[];for(let i=0;i<5;i++)S.rows.push({label:String(i+1),v:Array(S.n).fill(''),ex:false});S.example=false;$('autoExMsg').textContent='';syncControls();renderTable();update();});
+ $('btnClear').addEventListener('click',()=>{S.variable='';S.unit='';S.lsl='';S.tgt='';S.usl='';S.view='';S.method='auto';S.rows=[];for(let i=0;i<5;i++)S.rows.push({label:String(i+1),v:Array(S.n).fill(''),ex:false});S.example=false;$('autoExMsg').textContent='';syncControls();renderTable();update();});
  $('btnPasteToggle').addEventListener('click',()=>{const p=$('pastePanel');p.hidden=!p.hidden;});
  $('btnImport').addEventListener('click',importPaste);
  $('btnAutoEx').addEventListener('click',autoExclude);
@@ -691,6 +727,18 @@ function bind(){
  $('btnCopy').addEventListener('click',async()=>{const t=summaryText(),box=$('sumBox');
   try{await navigator.clipboard.writeText(t);$('copyMsg').textContent='Resumen copiado.';box.hidden=true;}
   catch(e){box.value=t;box.hidden=false;box.focus();box.select();$('copyMsg').textContent='Seleccione y copie el texto de abajo.';}});}
+
+let _rs=null;
+function prepPrint(){
+ const on=Object.keys(S.rules).filter(k=>S.rules[k]).join(', '),m=A&&A.ok?methodUsed():'',sp=[];
+ if(S.lsl)sp.push('LIE = '+S.lsl);if(S.tgt)sp.push('T = '+S.tgt);if(S.usl)sp.push('LSE = '+S.usl);
+ $('printHead').innerHTML='<div class="phead"><h1>Informe de control estadístico de variables</h1><p><b>Variable:</b> '+esc(S.variable||'sin nombre')+(S.unit?' ('+esc(S.unit)+')':'')+(A&&A.ok?' · n = '+A.n+' · k = '+A.act.length+' · n·k = '+A.N:'')+'</p><p><b>Especificaciones:</b> '+(sp.length?esc(sp.join(' · ')):'no capturadas')+(m?' · σ̂ estimada con '+(m==='R'?'R̄/d₂':'S̄/c₄'):'')+'</p><p><b>Reglas de detección activas (Nelson):</b> '+(on||'ninguna')+' · <b>Fecha:</b> '+new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'})+'</p></div>';
+ _rs={r:$('xrOut').hidden,s:$('xsOut').hidden,d:[]};
+ if($('pdfBoth').checked){$('xrOut').hidden=false;$('xsOut').hidden=false;}
+ if($('pdfTheory').checked){document.body.classList.add('pr-theory');document.querySelectorAll('#theory details').forEach(d=>{_rs.d.push([d,d.open]);d.open=true;});}}
+function endPrint(){if(!_rs)return;$('xrOut').hidden=_rs.r;$('xsOut').hidden=_rs.s;_rs.d.forEach(x=>{x[0].open=x[1];});document.body.classList.remove('pr-theory');_rs=null;}
+window.addEventListener('beforeprint',prepPrint);window.addEventListener('afterprint',endPrint);
+$('btnPdf').addEventListener('click',()=>{try{window.print();}catch(e){$('pdfMsg').textContent='Este visor no permite imprimir. Abra la página publicada en GitHub y use este botón allí, o presione Ctrl+P.';}});
 
 load();syncControls();renderTheory();renderTable();bind();update();
 })();
