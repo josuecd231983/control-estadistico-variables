@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Control Estadístico de Variables</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Concepto: hoja de trabajo de laboratorio de calidad. Datos en mono, explicaciones en serif, controles en sans. */
+:root{
+ --bg:#F1F5F7;--surface:#FFFFFF;--surface2:#E8EEF1;--ink:#10232A;--ink2:#4A5F68;--line:#C9D5DA;--grid:#E1E8EB;
+ --accent:#1B5E8C;--accentInk:#FFFFFF;--accentSoft:#DCEAF3;
+ --ok:#1E7B4A;--okSoft:#DDF0E5;--warn:#8F5A00;--warnSoft:#F8EBCB;--bad:#B3341F;--badSoft:#F7DDD7;
+ --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+ --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+ --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#0E1A20;--surface:#142530;--surface2:#1B303D;--ink:#E4EEF2;--ink2:#9DB3BD;--line:#2A4352;--grid:#223A47;
+ --accent:#6DB3E3;--accentInk:#0B1B24;--accentSoft:#1B3647;
+ --ok:#5CCB92;--okSoft:#173A2B;--warn:#E4B04F;--warnSoft:#3A2E12;--bad:#FF8A73;--badSoft:#40201B;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#0E1A20;--surface:#142530;--surface2:#1B303D;--ink:#E4EEF2;--ink2:#9DB3BD;--line:#2A4352;--grid:#223A47;
+ --accent:#6DB3E3;--accentInk:#0B1B24;--accentSoft:#1B3647;
+ --ok:#5CCB92;--okSoft:#173A2B;--warn:#E4B04F;--warnSoft:#3A2E12;--bad:#FF8A73;--badSoft:#40201B;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:20px 64px}
+h1{font:600 clamp(1.5rem,4.2vw,2.15rem)/1.15 var(--sans);letter-spacing:-.01em;margin:0;text-wrap:balance}
+h2{font:600 1.35rem/1.25 var(--sans);margin:0;text-wrap:balance}
+h3{font:600 1.02rem/1.3 var(--sans);margin:1.4rem 0 .5rem}
+p{margin:.5rem 0}
+.top{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding-block:6px 14px}
+.top svg{flex:none;color:var(--accent)}
+.sub{color:var(--ink2);margin:.2rem 0 0}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-block:1px solid var(--line);display:flex;gap:2px;overflow-x:auto;padding:4px 16px;margin-inline:-16px}
+.nav a{white-space:nowrap;color:var(--ink2);text-decoration:none;padding:.4rem .7rem;border-radius:4px;font-weight:500;font-size:.9rem}
+.nav a:hover{background:var(--accentSoft);color:var(--accent)}
+.sec{margin-top:44px;scroll-margin-top:56px}
+.sec>.sh{display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:.45rem;margin-bottom:1rem}
+.step{font:500 .78rem var(--mono);color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;min-width:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--ink2);font-weight:500;min-width:0}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.4rem .5rem;min-width:0}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font:500 .9rem var(--sans);border:1px solid var(--accent);background:var(--accent);color:var(--accentInk);border-radius:4px;padding:.5rem .9rem;cursor:pointer}
+.btn.sec2{background:transparent;color:var(--accent)}
+.btn.dng{background:transparent;color:var(--bad);border-color:var(--bad)}
+.btn:hover{filter:brightness(1.08)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{font-size:.85rem;color:var(--ink2)}
+.banner{border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--accentSoft);padding:10px 12px;border-radius:4px;font-size:.88rem;margin-block:12px}
+.banner.warn{border-left-color:var(--warn);background:var(--warnSoft)}
+.banner.bad{border-left-color:var(--bad);background:var(--badSoft)}
+.banner.ok{border-left-color:var(--ok);background:var(--okSoft)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:.38rem .55rem;text-align:left;border-bottom:1px solid var(--grid);vertical-align:middle}
+th{font-size:.78rem;color:var(--ink2);font-weight:600;background:var(--surface2);white-space:nowrap}
+td.c,th.c{text-align:center}
+td.o{font-family:var(--mono);color:var(--ink2);text-align:right;white-space:nowrap}
+td.m,.mono{font-family:var(--mono)}
+table.dt input.v{width:4.8rem;text-align:right;font-family:var(--mono)}
+table.dt input.lab{width:5.2rem;font-family:var(--mono)}
+button.x{background:none;border:0;color:var(--ink2);font-size:1.1rem;cursor:pointer;padding:0 .4rem}
+button.x:hover{color:var(--bad)}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.tile .k{font-size:.75rem;color:var(--ink2);font-weight:500}
+.tile .v{font:500 1.35rem var(--mono);margin-top:2px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:10px}
+.badge{display:inline-block;font:600 .74rem var(--sans);padding:.12rem .5rem;border-radius:3px;white-space:nowrap}
+.badge.ok{background:var(--okSoft);color:var(--ok)}.badge.warn{background:var(--warnSoft);color:var(--warn)}.badge.bad{background:var(--badSoft);color:var(--bad)}
+.verdict{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:16px;display:grid;grid-template-columns:auto 1fr;gap:6px 22px;align-items:center}
+.verdict .vv{font:600 2.4rem/1 var(--sans);color:var(--accent);grid-row:span 2}
+.verdict .vk{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-weight:600}
+@media (max-width:520px){.verdict{grid-template-columns:1fr}.verdict .vv{grid-row:auto}}
+.chart{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;margin-block:12px}
+.chart svg{display:block;min-width:660px;width:100%;height:auto}
+.chart text{font:11px var(--mono);fill:var(--ink2)}
+.chart .tt{font:600 12px var(--sans);fill:var(--ink)}
+.chart .g{stroke:var(--grid);stroke-width:1}
+.chart .ax{stroke:var(--ink2);stroke-width:1}
+.chart .lim{stroke:var(--bad);stroke-width:1.5;stroke-dasharray:7 4}
+.chart .cl{stroke:var(--ink2);stroke-width:1.5}
+.chart .zn{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.chart .pl{fill:none;stroke:var(--accent);stroke-width:1.6}
+.chart .pt{fill:var(--accent);stroke:var(--surface);stroke-width:1}
+.chart .px{fill:var(--surface);stroke:var(--accent);stroke-width:1.5;stroke-dasharray:2 2}
+.chart .pb{fill:var(--bad);stroke:var(--surface);stroke-width:1.5}
+.chart text.rl{fill:var(--bad);font-weight:600}
+.chart .bar{fill:var(--accentSoft);stroke:var(--accent);stroke-width:1}
+.chart .barx{fill:var(--badSoft);stroke:var(--bad);stroke-width:1}
+.chart .curve{fill:none;stroke:var(--ink);stroke-width:1.8}
+.chart .sp{stroke:var(--bad);stroke-width:2}
+.chart .tg{stroke:var(--ok);stroke-width:2;stroke-dasharray:6 3}
+.chart .mu{stroke:var(--accent);stroke-width:2}
+.cscroll{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:6px;background:var(--surface);position:relative}
+table.ct th{position:sticky;top:0;z-index:1;text-align:right}
+table.ct td{font-family:var(--mono);text-align:right}
+table.ct td.hl{background:var(--accentSoft);font-weight:600}
+table.ct th.hl{background:var(--accent);color:var(--accentInk)}
+table.ct tr.cur td{background:var(--surface2);font-weight:600;border-block:2px solid var(--accent)}
+table.ct tr.cur td.hl{background:var(--accent);color:var(--accentInk)}
+.seg{display:inline-flex;border:1px solid var(--accent);border-radius:4px;overflow:hidden}
+.seg button{font:600 .95rem var(--sans);background:transparent;color:var(--accent);border:0;padding:.5rem 1.2rem;cursor:pointer}
+.seg button+button{border-left:1px solid var(--accent)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accentInk)}
+.prose{font-family:var(--serif);font-size:1.03rem;line-height:1.65;max-width:72ch}
+.prose p,.prose li{margin:.55rem 0}
+.prose ul{padding-left:1.2rem}
+.fx{font-family:var(--mono);font-size:.92rem;background:var(--surface2);border:1px solid var(--line);border-radius:4px;padding:.45rem .7rem;margin:.5rem 0;overflow-x:auto;white-space:nowrap}
+.ov{text-decoration:overline}.ov2{text-decoration:overline double}
+details.acc{background:var(--surface);border:1px solid var(--line);border-radius:6px;margin-block:8px}
+details.acc>summary{cursor:pointer;padding:.7rem 1rem;font-weight:600;list-style:none}
+details.acc>summary::before{content:"+";display:inline-block;width:1.2rem;color:var(--accent);font-family:var(--mono)}
+details.acc[open]>summary::before{content:"−"}
+details.acc>div{padding:0 1rem 1rem}
+.interp h4{margin:1rem 0 .3rem;font:600 .95rem var(--sans)}
+.interp ul{margin:.3rem 0;padding-left:1.2rem}
+.interp li{margin:.25rem 0}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.big{font:500 2rem/1.1 var(--mono)}
+.sumbox{width:100%;min-height:9rem;font:12px/1.4 var(--mono)}
+ol.refs{font-family:var(--serif);padding-left:1.4rem}
+ol.refs li{margin:.5rem 0}
+@media (prefers-reduced-motion:no-preference){.btn{transition:filter .15s}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="top">
+ <svg width="46" height="34" viewBox="0 0 46 34" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 8h42M2 26h42" stroke-dasharray="4 3" opacity=".6"/><path d="M2 17h42" opacity=".6"/><path d="M3 18l8-5 8 7 8-9 8 8 8-4" stroke-linejoin="round"/></svg>
+ <div>
+  <h1>Control Estadístico de Variables</h1>
+  <p class="sub">Gráficos X̄-R y X̄-S, criterio de elección y capacidad de proceso (Cp, Cpk, Cpm)</p>
+ </div>
+</header>
+<nav class="nav" aria-label="Secciones">
+ <a href="#datos">1 Datos</a><a href="#eleccion">2 Elección</a><a href="#graficos">3 Gráficos</a><a href="#capacidad">4 Capacidad</a><a href="#teoria">Fundamentos</a><a href="#refs">Referencias</a>
+</nav>
+
+<section class="sec" id="datos">
+ <div class="sh"><span class="step">Paso 1</span><h2>Captura de datos</h2></div>
+ <div id="exBanner" class="banner" hidden></div>
+ <div class="card">
+  <div class="fields">
+   <label class="f">Variable<input id="variable" type="text"></label>
+   <label class="f">Unidad<input id="unit" type="text"></label>
+   <label class="f">Tamaño de subgrupo n (2 a 25)<input id="nInput" type="number" min="2" max="25" step="1"></label>
+   <label class="f">Decimales mostrados<input id="dec" type="number" min="1" max="6" step="1"></label>
+  </div>
+  <h3>Especificaciones (para la capacidad)</h3>
+  <div class="fields">
+   <label class="f">LIE (límite inferior)<input id="lsl" type="text" inputmode="decimal"></label>
+   <label class="f">Valor objetivo T<input id="tgt" type="text" inputmode="decimal" placeholder="punto medio si se omite"></label>
+   <label class="f">LSE (límite superior)<input id="usl" type="text" inputmode="decimal"></label>
+  </div>
+  <p class="note">Puede dejar vacío un límite si la especificación es unilateral. Los límites de especificación vienen del cliente o del diseño; no se calculan con los datos.</p>
+  <div class="row" style="margin-top:10px">
+   <button class="btn" id="btnAdd" type="button">Agregar subgrupo</button>
+   <button class="btn sec2" id="btnExample" type="button">Cargar ejemplo PVC</button>
+   <button class="btn sec2" id="btnPasteToggle" type="button">Pegar desde Excel</button>
+   <button class="btn dng" id="btnClear" type="button">Limpiar</button>
+  </div>
+  <div id="pastePanel" hidden style="margin-top:12px">
+   <label class="f">Una fila por subgrupo; columnas separadas por tabulador, punto y coma, coma o espacio
+    <textarea id="pasteTxt" rows="6" style="font-family:var(--mono)" placeholder="06:00&#9;15.9&#9;27.5&#9;22.7&#10;07:00&#9;22.5&#9;22.8&#9;20.3"></textarea></label>
+   <div class="row" style="margin-top:8px">
+    <label class="row note"><input type="checkbox" id="pasteLabel"> La primera columna es una etiqueta o número de subgrupo</label>
+    <button class="btn" id="btnImport" type="button">Importar y reemplazar datos</button>
+   </div>
+  </div>
+ </div>
+ <div class="scroll" style="margin-top:12px"><table class="dt" id="tbl"></table></div>
+ <p class="note">Solo se usan subgrupos completos. Marque «Excl.» para sacar un subgrupo del cálculo de los límites cuando haya identificado una causa asignable; seguirá visible en las gráficas con marcador hueco.</p>
+ <div class="row"><button class="btn sec2" id="btnAutoEx" type="button">Excluir subgrupos fuera de control y recalcular</button><span class="note" id="autoExMsg"></span></div>
+ <h3>Estadísticos globales</h3>
+ <div class="tiles" id="gstats"></div>
+</section>
+
+<section class="sec" id="eleccion">
+ <div class="sh"><span class="step">Paso 2</span><h2>¿Qué gráfico conviene: X̄-R o X̄-S?</h2></div>
+ <div id="verdict"></div>
+</section>
+
+<section class="sec" id="graficos">
+ <div class="sh"><span class="step">Paso 3</span><h2>Gráficos de control</h2></div>
+ <div class="row" style="margin-bottom:12px">
+  <b class="note">Gráfico a mostrar</b>
+  <div class="seg" id="seg" role="group" aria-label="Gráfico a mostrar">
+   <button type="button" data-view="R" aria-pressed="true">X̄-R</button>
+   <button type="button" data-view="S" aria-pressed="false">X̄-S</button>
+  </div>
+  <span class="note" id="segHint"></span>
+ </div>
+ <div class="card">
+  <div class="row">
+   <label class="row note"><input type="checkbox" id="zones" checked> Mostrar zonas de 1σ y 2σ</label>
+  </div>
+  <p class="note" style="margin-top:8px">Reglas de detección aplicadas (numeración de Nelson, 1984):</p>
+  <div class="row" id="rulesBox">
+   <label class="row note"><input type="checkbox" data-r="1" checked> 1 · punto fuera de 3σ</label>
+   <label class="row note"><input type="checkbox" data-r="2" checked> 2 · 9 del mismo lado</label>
+   <label class="row note"><input type="checkbox" data-r="3" checked> 3 · 6 en tendencia</label>
+   <label class="row note"><input type="checkbox" data-r="4"> 4 · 14 alternando</label>
+   <label class="row note"><input type="checkbox" data-r="5" checked> 5 · 2 de 3 más allá de 2σ</label>
+   <label class="row note"><input type="checkbox" data-r="6" checked> 6 · 4 de 5 más allá de 1σ</label>
+  </div>
+  <p class="note">Las reglas 5 y 6 se aplican solo al gráfico de medias; en los de dispersión se usan las reglas 1 a 4.</p>
+ </div>
+ <div id="xrOut"></div>
+ <div id="xsOut" hidden></div>
+ <div id="constOut"></div>
+</section>
+
+<section class="sec" id="capacidad">
+ <div class="sh"><span class="step">Paso 4</span><h2>Análisis de capacidad del proceso</h2></div>
+ <div class="card"><label class="f" style="max-width:340px">Estimador de σ dentro de subgrupos
+  <select id="method"><option value="auto">Automático (el gráfico que esté mostrando)</option><option value="R">R̄ / d₂ (gráfico X̄-R)</option><option value="S">S̄ / c₄ (gráfico X̄-S)</option></select></label></div>
+ <div id="capOut"></div>
+ <div class="row" style="margin-top:12px"><button class="btn sec2" id="btnCopy" type="button">Copiar resumen de resultados</button><span class="note" id="copyMsg"></span></div>
+ <textarea id="sumBox" class="sumbox" hidden readonly aria-label="Resumen para copiar"></textarea>
+</section>
+
+<section class="sec" id="teoria">
+ <div class="sh"><span class="step">Referencia</span><h2>Fundamentos y explicación detallada</h2></div>
+ <div id="theory"></div>
+</section>
+
+<section class="sec" id="refs">
+ <div class="sh"><span class="step">Referencia</span><h2>Bibliografía</h2></div>
+ <ol class="refs">
+  <li>Montgomery, D. C. (2019). <i>Introduction to Statistical Quality Control</i> (8.ª ed.). Wiley. (Cap. 5 y 6 para gráficos de control por variables; cap. 8 para capacidad de proceso.)</li>
+  <li>Gutiérrez Pulido, H., y De la Vara Salazar, R. (2013). <i>Control estadístico de la calidad y Seis Sigma</i> (3.ª ed.). McGraw-Hill.</li>
+  <li>Besterfield, D. H. (2009). <i>Quality Control</i> (8.ª ed.). Pearson Prentice Hall.</li>
+  <li>Shewhart, W. A. (1931). <i>Economic Control of Quality of Manufactured Product</i>. Van Nostrand.</li>
+  <li>Nelson, L. S. (1984). The Shewhart control chart: Tests for special causes. <i>Journal of Quality Technology, 16</i>(4), 237–239.</li>
+  <li>Western Electric Company. (1956). <i>Statistical Quality Control Handbook</i>. Western Electric.</li>
+  <li>Kane, V. E. (1986). Process capability indices. <i>Journal of Quality Technology, 18</i>(1), 41–52.</li>
+  <li>Chan, L. K., Cheng, S. W., y Spiring, F. A. (1988). A new measure of process capability: C<sub>pm</sub>. <i>Journal of Quality Technology, 20</i>(3), 162–175.</li>
+  <li>Pearn, W. L., Kotz, S., y Johnson, N. L. (1992). Distributional and inferential properties of process capability indices. <i>Journal of Quality Technology, 24</i>(4), 216–231.</li>
+  <li>Bissell, A. F. (1990). How reliable is your capability index? <i>Applied Statistics, 39</i>(3), 331–340.</li>
+  <li>Jarque, C. M., y Bera, A. K. (1987). A test for normality of observations and regression residuals. <i>International Statistical Review, 55</i>(2), 163–172.</li>
+  <li>Wilson, E. B., y Hilferty, M. M. (1931). The distribution of chi-square. <i>Proceedings of the National Academy of Sciences, 17</i>(12), 684–688.</li>
+  <li>Automotive Industry Action Group. (2005). <i>Statistical Process Control (SPC) Reference Manual</i> (2.ª ed.). AIAG.</li>
+  <li>International Organization for Standardization. (2013). <i>ISO 7870-2:2013 Control charts — Part 2: Shewhart control charts</i>. ISO.</li>
+ </ol>
+ <p class="note">Las constantes A₂, A₃, c₄, B₃, B₄, d₂, d₃, D₃ y D₄ son las de la tabla «Constantes para gráficos de control» (n = 2 a 25) que se usa en el curso. Verifique ediciones y páginas en su biblioteca antes de citar.</p>
+</section>
+</div>
+<script>
+(function(){'use strict';
+//#CORE-START
+const KT={
+2:[1.880,2.659,0.798,0.000,3.267,1.128,0.853,0.000,3.267],
+3:[1.023,1.954,0.886,0.000,2.568,1.693,0.888,0.000,2.575],
+4:[0.729,1.628,0.921,0.000,2.266,2.059,0.880,0.000,2.282],
+5:[0.577,1.427,0.940,0.000,2.089,2.326,0.864,0.000,2.114],
+6:[0.483,1.287,0.952,0.030,1.970,2.534,0.848,0.000,2.004],
+7:[0.419,1.182,0.959,0.118,1.882,2.704,0.833,0.076,1.924],
+8:[0.373,1.099,0.965,0.185,1.815,2.847,0.820,0.136,1.864],
+9:[0.337,1.032,0.969,0.239,1.761,2.970,0.808,0.184,1.816],
+10:[0.308,0.975,0.973,0.284,1.716,3.078,0.797,0.223,1.777],
+11:[0.285,0.927,0.975,0.321,1.679,3.173,0.787,0.256,1.744],
+12:[0.266,0.886,0.978,0.354,1.646,3.258,0.778,0.283,1.717],
+13:[0.249,0.850,0.979,0.382,1.618,3.336,0.770,0.307,1.693],
+14:[0.235,0.817,0.981,0.406,1.594,3.407,0.763,0.328,1.672],
+15:[0.223,0.789,0.982,0.428,1.572,3.472,0.756,0.347,1.653],
+16:[0.212,0.763,0.983,0.448,1.552,3.532,0.750,0.363,1.637],
+17:[0.203,0.739,0.985,0.466,1.534,3.588,0.744,0.378,1.622],
+18:[0.194,0.718,0.985,0.482,1.518,3.640,0.739,0.391,1.609],
+19:[0.187,0.698,0.986,0.497,1.503,3.689,0.733,0.404,1.596],
+20:[0.180,0.680,0.987,0.510,1.490,3.735,0.729,0.415,1.585],
+21:[0.173,0.663,0.988,0.523,1.477,3.778,0.724,0.425,1.575],
+22:[0.167,0.647,0.988,0.534,1.466,3.819,0.720,0.435,1.565],
+23:[0.162,0.633,0.989,0.545,1.455,3.858,0.716,0.443,1.557],
+24:[0.157,0.619,0.989,0.555,1.445,3.895,0.712,0.452,1.548],
+25:[0.153,0.606,0.990,0.565,1.435,3.931,0.708,0.459,1.541]};
+function K(n){const a=KT[n];return a?{A2:a[0],A3:a[1],c4:a[2],B3:a[3],B4:a[4],d2:a[5],d3:a[6],D3:a[7],D4:a[8]}:null;}
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const sd=a=>{if(a.length<2)return 0;const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1));};
+const num=x=>{const t=String(x==null?'':x).trim().replace(',','.');if(t==='')return NaN;const v=Number(t);return Number.isFinite(v)?v:NaN;};
+function erfc(x){const z=Math.abs(x),t=1/(1+0.5*z);
+ const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))));
+ return x>=0?r:2-r;}
+const Phi=z=>0.5*erfc(-z/Math.SQRT2);
+const wh=(z,v)=>v*Math.pow(1-2/(9*v)+z*Math.sqrt(2/(9*v)),3);
+
+function evalRules(vals,lim,on,useZ){
+ const m=vals.length,out=Array.from({length:m},()=>[]),cl=lim.cl,s=lim.sigma;
+ for(let i=0;i<m;i++){
+  const v=vals[i];
+  if(on[1]&&(v>lim.ucl||v<lim.lcl))out[i].push(1);
+  if(on[2]&&i>=8){const w=vals.slice(i-8,i+1);if(w.every(x=>x>cl)||w.every(x=>x<cl))out[i].push(2);}
+  if(on[3]&&i>=5){let up=true,dn=true;for(let j=i-4;j<=i;j++){if(!(vals[j]>vals[j-1]))up=false;if(!(vals[j]<vals[j-1]))dn=false;}if(up||dn)out[i].push(3);}
+  if(on[4]&&i>=13){let ok=true;for(let j=i-11;j<=i;j++){if(!((vals[j]-vals[j-1])*(vals[j-1]-vals[j-2])<0)){ok=false;break;}}if(ok)out[i].push(4);}
+  if(useZ&&s>0){
+   const side=v>cl?1:-1;
+   if(on[5]&&i>=2&&side*(v-cl)>2*s){let c=0;for(let j=i-2;j<=i;j++)if(side*(vals[j]-cl)>2*s)c++;if(c>=2)out[i].push(5);}
+   if(on[6]&&i>=4&&side*(v-cl)>s){let c=0;for(let j=i-4;j<=i;j++)if(side*(vals[j]-cl)>s)c++;if(c>=4)out[i].push(6);}
+  }
+ }
+ return out;}
+
+function recommend(n){
+ if(n<=5)return{pick:'R',alt:'S',lvl:'Recomendación sólida',why:[
+  'Con n ≤ 5 el rango es casi tan eficiente como la desviación estándar para estimar σ, así que no se pierde información útil.',
+  'El rango es fácil de calcular y de explicar en piso de producción; por eso es el gráfico de uso más extendido para subgrupos pequeños.']};
+ if(n<=10)return{pick:'R',alt:'S',lvl:'Ambos son válidos',why:[
+  'Con 6 ≤ n ≤ 10 el gráfico R sigue siendo aceptable, aunque su eficiencia estadística ya empieza a bajar frente a S.',
+  'Si el cálculo lo hace software, el gráfico X̄-S es una alternativa ligeramente más eficiente. Si el registro es manual, X̄-R sigue siendo práctico.']};
+ return{pick:'S',alt:'R',lvl:'Recomendación sólida',why:[
+  'Con n > 10 el rango desperdicia información porque solo usa dos observaciones del subgrupo (la mayor y la menor); su eficiencia cae de forma notable.',
+  'La desviación estándar usa todas las observaciones del subgrupo, por lo que detecta cambios de variabilidad con mayor sensibilidad.']};}
+
+function analyze(S){
+ const n=S.n,k=K(n),rows=[];
+ S.rows.forEach((r,i)=>{const vals=r.v.slice(0,n).map(num);
+  if(vals.length===n&&vals.every(Number.isFinite))rows.push({i,label:r.label||String(i+1),vals,mean:mean(vals),R:Math.max(...vals)-Math.min(...vals),s:sd(vals),ex:!!r.ex});});
+ const act=rows.filter(r=>!r.ex),A={n,k,rows,act,ok:act.length>=2,rec:recommend(n)};
+ if(!A.ok)return A;
+ A.Xbb=mean(act.map(r=>r.mean));A.Rbar=mean(act.map(r=>r.R));A.Sbar=mean(act.map(r=>r.s));
+ A.sig={R:A.Rbar/k.d2,S:A.Sbar/k.c4};
+ A.lim={
+  xr:{cl:A.Xbb,ucl:A.Xbb+k.A2*A.Rbar,lcl:A.Xbb-k.A2*A.Rbar,sigma:k.A2*A.Rbar/3},
+  r:{cl:A.Rbar,ucl:k.D4*A.Rbar,lcl:k.D3*A.Rbar,sigma:k.d3*A.Rbar},
+  xs:{cl:A.Xbb,ucl:A.Xbb+k.A3*A.Sbar,lcl:A.Xbb-k.A3*A.Sbar,sigma:k.A3*A.Sbar/3},
+  s:{cl:A.Sbar,ucl:k.B4*A.Sbar,lcl:k.B3*A.Sbar,sigma:A.Sbar*Math.sqrt(1-k.c4*k.c4)/k.c4}};
+ const on=S.rules,mv=rows.map(r=>r.mean);
+ A.fl={xr:evalRules(mv,A.lim.xr,on,true),xs:evalRules(mv,A.lim.xs,on,true),
+  r:evalRules(rows.map(r=>r.R),A.lim.r,on,false),s:evalRules(rows.map(r=>r.s),A.lim.s,on,false)};
+ const all=[];act.forEach(r=>r.vals.forEach(v=>all.push(v)));
+ A.N=all.length;A.sdAll=sd(all);
+ const mu=mean(all),m2=mean(all.map(x=>(x-mu)**2)),m3=mean(all.map(x=>(x-mu)**3)),m4=mean(all.map(x=>(x-mu)**4));
+ A.g1=m2>0?m3/Math.pow(m2,1.5):NaN;A.g2=m2>0?m4/(m2*m2)-3:NaN;
+ A.JB=A.N/6*(A.g1*A.g1+A.g2*A.g2/4);A.JBp=Math.exp(-A.JB/2);
+ A.allVals=all;
+ return A;}
+
+function activeFlags(A,key){let c=0;A.rows.forEach((r,j)=>{if(!r.ex&&A.fl[key][j].length)c++;});return c;}
+
+function capacity(S,A,m){
+ const lsl=num(S.lsl),usl=num(S.usl),hasL=Number.isFinite(lsl),hasU=Number.isFinite(usl),o={hasL,hasU,lsl,usl,m};
+ if(!hasL&&!hasU){o.err='none';return o;}
+ if(hasL&&hasU&&usl<=lsl){o.err='order';return o;}
+ const mu=A.Xbb,sw=m==='R'?A.sig.R:A.sig.S,so=A.sdAll,N=A.N;
+ if(!(sw>0)){o.err='sigma0';return o;}
+ Object.assign(o,{mu,sw,so,N});
+ const mid=hasL&&hasU?(lsl+usl)/2:NaN;let T=num(S.tgt);if(!Number.isFinite(T))T=mid;o.T=T;o.mid=mid;
+ o.Cpu=hasU?(usl-mu)/(3*sw):NaN;o.Cpl=hasL?(mu-lsl)/(3*sw):NaN;
+ o.Cp=hasL&&hasU?(usl-lsl)/(6*sw):NaN;
+ o.Cpk=Math.min(...[o.Cpu,o.Cpl].filter(Number.isFinite));
+ o.tau=Math.sqrt(sw*sw+(mu-T)*(mu-T));
+ o.Cpm=hasL&&hasU&&Number.isFinite(T)?(usl-lsl)/(6*o.tau):NaN;
+ o.Ppu=hasU?(usl-mu)/(3*so):NaN;o.Ppl=hasL?(mu-lsl)/(3*so):NaN;
+ o.Pp=hasL&&hasU?(usl-lsl)/(6*so):NaN;o.Ppk=Math.min(...[o.Ppu,o.Ppl].filter(Number.isFinite));
+ o.k=hasL&&hasU?Math.abs(mu-mid)/((usl-lsl)/2):NaN;
+ o.pL=hasL?Phi((lsl-mu)/sw)*1e6:0;o.pU=hasU?Phi((mu-usl)/sw)*1e6:0;o.ppm=o.pL+o.pU;
+ const v=N-1;
+ if(Number.isFinite(o.Cp)){o.CpLo=o.Cp*Math.sqrt(wh(-1.959964,v)/v);o.CpHi=o.Cp*Math.sqrt(wh(1.959964,v)/v);}
+ const h=1.959964*Math.sqrt(1/(9*N)+o.Cpk*o.Cpk/(2*v));o.CpkLo=o.Cpk-h;o.CpkHi=o.Cpk+h;
+ return o;}
+//#CORE-END
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const XB='<span class="ov">X</span>',XBB='<span class="ov2">X</span>',RB='<span class="ov">R</span>',SB='<span class="ov">S</span>';
+const EXAMPLE={variable:'Longitud de tubo de PVC',unit:'in',n:3,dec:3,lsl:'16',tgt:'22',usl:'28',method:'auto',zones:true,
+ rules:{1:true,2:true,3:true,4:false,5:true,6:true},example:true,view:'',
+ rows:[['06:00',15.9,27.5,22.7],['07:00',22.5,22.8,20.3],['08:00',22.8,22.5,20.5],['09:00',19.3,20.2,20.4],['10:00',19.5,20.1,20.3],['11:00',20.8,22.7,22.5],['12:00',22.7,22.5,20.2],['13:00',20.0,20.0,22.1]]
+  .map(r=>({label:r[0],v:r.slice(1).map(String),ex:false}))};
+let S=JSON.parse(JSON.stringify(EXAMPLE)),A=null;
+const f=(x,d)=>Number.isFinite(x)?x.toFixed(d==null?S.dec:d):'—';
+const fi=x=>Number.isFinite(x)?x.toFixed(2):'—';
+const fp=x=>!Number.isFinite(x)?'—':x<0.005?'< 0.01':x>=100?x.toFixed(0):x.toFixed(2);
+
+function niceTicks(lo,hi,cnt){const raw=(hi-lo)/cnt,mag=Math.pow(10,Math.floor(Math.log10(raw))),q=raw/mag,
+ step=(q<1.5?1:q<3?2:q<7?5:10)*mag,t=[];for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(10));return t;}
+const tickFmt=(v,d)=>Math.abs(v)>=1000?v.toFixed(0):(+v.toFixed(Math.max(d,1))).toString();
+
+function chartSVG(o){
+ const W=980,H=330,mL=64,mR=84,mT=26,mB=48,m=o.values.length;if(!m)return'';
+ let lo=Math.min(o.lcl,...o.values),hi=Math.max(o.ucl,...o.values);
+ const pad=(hi-lo)*0.08||1;lo-=pad;hi+=pad;
+ if(o.floor0&&lo<0&&Math.min(...o.values)>=0&&o.lcl>=0)lo=Math.min(0,o.lcl)-pad*0.3;
+ const pw=W-mL-mR,ph=H-mT-mB,X=i=>mL+(i+0.5)*pw/m,Y=v=>mT+(hi-v)/(hi-lo)*ph,d=S.dec;
+ let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.title)+'">';
+ s+='<text class="tt" x="'+mL+'" y="16">'+esc(o.title)+'</text>';
+ niceTicks(lo,hi,5).forEach(t=>{s+='<line class="g" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+Y(t)+'" y2="'+Y(t)+'"/><text x="'+(mL-8)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+tickFmt(t,d)+'</text>';});
+ s+='<line class="ax" x1="'+mL+'" x2="'+mL+'" y1="'+mT+'" y2="'+(H-mB)+'"/><line class="ax" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+(H-mB)+'" y2="'+(H-mB)+'"/>';
+ if(o.zones&&o.sigma>0)[-2,-1,1,2].forEach(z=>{const v=o.cl+z*o.sigma;if(v>lo&&v<hi)s+='<line class="zn" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text x="'+(W-mR+6)+'" y="'+(Y(v)+4)+'" style="opacity:.7">'+(z>0?'+':'−')+Math.abs(z)+'σ</text>';});
+ [[o.ucl,'lim','LCS'],[o.cl,'cl','LC'],[o.lcl,'lim','LCI']].forEach(L=>{
+  if(L[2]==='LCI'&&o.hideLcl)return;
+  s+='<line class="'+L[1]+'" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+Y(L[0])+'" y2="'+Y(L[0])+'"/><text x="'+(W-mR+6)+'" y="'+(Y(L[0])-(L[2]==='LC'?5:-12))+'" style="fill:var(--ink)">'+L[2]+' '+f(L[0])+'</text>';});
+ s+='<polyline class="pl" points="'+o.values.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')+'"/>';
+ const every=Math.ceil(m/20);
+ o.values.forEach((v,i)=>{
+  const bad=o.flags[i].length>0,cls=bad?'pb':o.ex[i]?'px':'pt';
+  s+='<circle class="'+cls+'" cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="'+(bad?5.5:3.8)+'"/>';
+  if(bad)s+='<text class="rl" x="'+X(i).toFixed(1)+'" y="'+(Y(v)-9).toFixed(1)+'" text-anchor="middle">'+o.flags[i].join(',')+'</text>';
+  if(i%every===0)s+='<text x="'+X(i).toFixed(1)+'" y="'+(H-mB+16)+'" text-anchor="middle">'+esc(String(o.labels[i]).slice(0,7))+'</text>';});
+ s+='<text x="'+(mL+pw/2)+'" y="'+(H-8)+'" text-anchor="middle">Subgrupo</text>';
+ s+='<text transform="translate(14,'+(mT+ph/2)+') rotate(-90)" text-anchor="middle">'+esc(o.ylab)+'</text></svg>';
+ return '<div class="chart">'+s+'</div>';}
+
+function histSVG(c,A){
+ const W=980,H=300,mL=50,mR=20,mT=30,mB=44,v=A.allVals,N=v.length;
+ let lo=Math.min(Math.min(...v),c.mu-4*c.sw),hi=Math.max(Math.max(...v),c.mu+4*c.sw);
+ if(c.hasL)lo=Math.min(lo,c.lsl-0.2*c.sw);if(c.hasU)hi=Math.max(hi,c.usl+0.2*c.sw);
+ const nb=Math.max(6,Math.min(16,Math.round(Math.sqrt(N)))),bw=(hi-lo)/nb,cnt=Array(nb).fill(0);
+ v.forEach(x=>{cnt[Math.min(nb-1,Math.floor((x-lo)/bw))]++;});
+ const pdf=x=>Math.exp(-0.5*((x-c.mu)/c.sw)**2)/(c.sw*Math.sqrt(2*Math.PI));
+ const peak=Math.max(Math.max(...cnt),N*bw*pdf(c.mu))*1.15,pw=W-mL-mR,ph=H-mT-mB;
+ const X=x=>mL+(x-lo)/(hi-lo)*pw,Y=y=>mT+(1-y/peak)*ph;
+ let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Histograma de las observaciones con límites de especificación y curva normal">';
+ s+='<text class="tt" x="'+mL+'" y="16">Distribución de las observaciones frente a las especificaciones</text>';
+ niceTicks(0,peak,4).forEach(t=>{s+='<line class="g" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+Y(t)+'" y2="'+Y(t)+'"/><text x="'+(mL-8)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+t+'</text>';});
+ cnt.forEach((n,i)=>{const x0=lo+i*bw,xc=x0+bw/2,out=(c.hasL&&xc<c.lsl)||(c.hasU&&xc>c.usl);
+  if(n>0)s+='<rect class="'+(out?'barx':'bar')+'" x="'+X(x0).toFixed(1)+'" y="'+Y(n).toFixed(1)+'" width="'+(bw/(hi-lo)*pw-1).toFixed(1)+'" height="'+(Y(0)-Y(n)).toFixed(1)+'"/>';});
+ let p='';for(let i=0;i<=160;i++){const x=lo+(hi-lo)*i/160;p+=(i?'L':'M')+X(x).toFixed(1)+','+Y(N*bw*pdf(x)).toFixed(1);}
+ s+='<path class="curve" d="'+p+'"/><line class="ax" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+Y(0)+'" y2="'+Y(0)+'"/>';
+ const V=(x,cls,lab,dy)=>'<line class="'+cls+'" x1="'+X(x)+'" x2="'+X(x)+'" y1="'+mT+'" y2="'+Y(0)+'"/><text x="'+X(x)+'" y="'+(mT-4+(dy||0))+'" text-anchor="middle">'+lab+'</text>';
+ if(c.hasL)s+=V(c.lsl,'sp','LIE');if(c.hasU)s+=V(c.usl,'sp','LSE');
+ if(Number.isFinite(c.T))s+=V(c.T,'tg','T',12);
+ s+=V(c.mu,'mu','μ̂',0);
+ niceTicks(lo,hi,8).forEach(t=>{s+='<text x="'+X(t)+'" y="'+(H-mB+16)+'" text-anchor="middle">'+tickFmt(t,S.dec)+'</text>';});
+ s+='<text x="'+(mL+pw/2)+'" y="'+(H-8)+'" text-anchor="middle">'+esc(S.variable)+(S.unit?' ('+esc(S.unit)+')':'')+'</text></svg>';
+ return '<div class="chart">'+s+'</div>';}
+
+const RULETXT={1:'un punto fuera de los límites de control (±3σ)',2:'9 puntos consecutivos del mismo lado de la línea central',3:'6 puntos consecutivos en ascenso o descenso',4:'14 puntos consecutivos alternando arriba y abajo',5:'2 de 3 puntos consecutivos más allá de 2σ, del mismo lado',6:'4 de 5 puntos consecutivos más allá de 1σ, del mismo lado'};
+const CAUSE_D={1:'Un aumento súbito de la variabilidad suele deberse a herramienta o dado desgastado, materia prima heterogénea, cambio de operador o de método, o fallas del instrumento. Antes de buscar causas en el proceso, confirme que el dato no sea un error de captura.',
+ 2:'Un nivel de dispersión que se mantiene de un solo lado indica un cambio persistente en la variabilidad (nuevo lote, nuevo ajuste, cambio de turno).',
+ 3:'Una tendencia en la dispersión sugiere desgaste progresivo del equipo o pérdida gradual de calibración.',
+ 4:'La alternancia sistemática sugiere dos fuentes que se turnan (dos máquinas, cavidades o turnos) o sobreajuste del proceso.'};
+const CAUSE_M={1:'Un punto fuera de límites indica un desplazamiento de la media: ajuste o calibración de la máquina, nuevo lote de materia prima, cambio de turno o variación de temperatura.',
+ 2:'Un corrimiento sostenido de la media apunta a un cambio de ajuste, de proveedor o de método que se quedó en el proceso.',
+ 3:'Una tendencia es típica de desgaste de herramental, acumulación térmica, fatiga del operador o agotamiento de un insumo.',
+ 4:'La alternancia sugiere sobreajuste del operador (tampering) o la mezcla de dos fuentes distintas en la misma gráfica.',
+ 5:'Es una señal temprana de que la media comienza a desplazarse, antes de que algún punto cruce el límite.',
+ 6:'Es una señal temprana y sostenida de desplazamiento de la media.'};
+
+function flagsByRule(A,key){const m={};A.rows.forEach((r,j)=>A.fl[key][j].forEach(q=>{(m[q]=m[q]||[]).push(esc(r.label)+(r.ex?'*':''));}));return m;}
+function findings(A,key,causes,name){
+ const m=flagsByRule(A,key),ks=Object.keys(m);
+ if(!ks.length)return '<p>Sin señales: ningún punto incumple las reglas activadas. La '+name+' se comporta como un proceso en estado de control estadístico.</p>';
+ let h='<ul>';ks.forEach(q=>{h+='<li><b>Regla '+q+':</b> '+RULETXT[q]+' en el subgrupo '+m[q].join(', ')+'. <span class="note">'+causes[q]+'</span></li>';});
+ return h+'</ul>'+(A.rows.some(r=>r.ex)?'<p class="note">* Subgrupo excluido del cálculo de los límites.</p>':'');}
+
+function renderStats(){
+ const g=$('gstats');
+ if(!A||!A.ok){g.innerHTML='<div class="banner warn" style="grid-column:1/-1">Capture al menos dos subgrupos completos para calcular.</div>';return;}
+ const t=(k,v)=>'<div class="tile"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>',ex=A.rows.length-A.act.length;
+ g.innerHTML=t('Subgrupos válidos',A.act.length+(ex?' <small>(+'+ex+' excl.)</small>':''))+t('Observaciones N',A.N)+t('Media de medias '+XBB,f(A.Xbb))+t('Rango medio '+RB,f(A.Rbar))+t('Desv. est. media '+SB,f(A.Sbar))+t('σ̂ = R̄/d₂',f(A.sig.R))+t('σ̂ = S̄/c₄',f(A.sig.S));}
+
+function renderVerdict(){
+ const el=$('verdict');if(!A||!A.ok){el.innerHTML='';return;}
+ const r=A.rec,pick=r.pick==='R'?'X̄-R':'X̄-S',alt=r.alt==='R'?'X̄-R':'X̄-S';
+ const nR=activeFlags(A,'r')+activeFlags(A,'xr'),nS=activeFlags(A,'s')+activeFlags(A,'xs');
+ const ratio=A.sig.R/A.sig.S,dif=Math.abs(ratio-1)*100;
+ let h='<div class="verdict"><div class="vv">'+pick+'</div><div class="vk">Gráfico recomendado para n = '+A.n+' · '+r.lvl+'</div><div><ul style="margin:0;padding-left:1.1rem">'+r.why.map(x=>'<li>'+x+'</li>').join('')+'</ul></div></div>';
+ h+='<h3>Comparación con sus datos</h3><div class="scroll"><table><thead><tr><th>Criterio</th><th>X̄-R</th><th>X̄-S</th></tr></thead><tbody>'
+  +'<tr><td>Estimador de σ</td><td class="m">R̄/d₂ = '+f(A.sig.R)+'</td><td class="m">S̄/c₄ = '+f(A.sig.S)+'</td></tr>'
+  +'<tr><td>Estadístico por subgrupo</td><td>Rango: usa 2 de las n observaciones</td><td>Desviación estándar: usa las n observaciones</td></tr>'
+  +'<tr><td>Eficiencia estadística con n = '+A.n+'</td><td>'+(A.n<=5?'Alta (casi igual a S)':A.n<=10?'Decreciente':'Baja')+'</td><td>Alta y estable al crecer n</td></tr>'
+  +'<tr><td>Cálculo manual</td><td>Sencillo</td><td>Más laborioso</td></tr>'
+  +'<tr><td>Puntos señalados (dispersión + medias)</td><td class="m">'+nR+'</td><td class="m">'+nS+'</td></tr></tbody></table></div>';
+ h+='<div class="row" style="margin-top:12px"><button type="button" class="btn" data-view="'+r.pick+'">Ver gráficos '+pick+'</button><button type="button" class="btn sec2" data-view="'+r.alt+'">Ver gráficos '+alt+'</button></div>';
+ h+='<p class="note">Los dos estimadores de σ difieren '+dif.toFixed(1)+' %. '+(dif>10?'Una discrepancia marcada puede indicar valores atípicos dentro de los subgrupos o falta de normalidad; es una señal diagnóstica, no una prueba formal.':'La coincidencia es razonable.')+' Alternativa válida: '+alt+'.</p>';
+ h+='<div class="scroll"><table><thead><tr><th>Tamaño de subgrupo</th><th>Gráfico habitual</th><th>Razón</th></tr></thead><tbody><tr><td>n = 2 a 5</td><td>X̄-R</td><td>Rango casi tan eficiente como S; simple</td></tr><tr><td>n = 6 a 10</td><td>X̄-R o X̄-S</td><td>Ambos aceptables; S algo más eficiente</td></tr><tr><td>n &gt; 10</td><td>X̄-S</td><td>El rango pierde eficiencia (Montgomery, 2019)</td></tr></tbody></table></div>';
+ el.innerHTML=h;}
+
+function limitsTable(key){
+ const k=A.k,isR=key==='R',B=isR?A.Rbar:A.Sbar,Bn=isR?'R̄':'S̄',a=isR?k.A2:k.A3,an=isR?'A₂':'A₃',up=isR?k.D4:k.B4,lo=isR?k.D3:k.B3,upn=isR?'D₄':'B₄',lon=isR?'D₃':'B₃';
+ const L=isR?A.lim.xr:A.lim.xs,D=isR?A.lim.r:A.lim.s,nm=isR?'R':'S';
+ const row=(g,fm,sub,v)=>'<tr><td>'+g+'</td><td class="m">'+fm+'</td><td class="m">'+sub+'</td><td class="m"><b>'+v+'</b></td></tr>';
+ return '<h3>Cálculo de los límites (n = '+A.n+': '+an+' = '+a+', '+lon+' = '+lo+', '+upn+' = '+up+')</h3><div class="scroll"><table><thead><tr><th>Gráfico</th><th>Fórmula</th><th>Sustitución</th><th>Valor</th></tr></thead><tbody>'
+ +row('X̄','LCS = X̿ + '+an+'·'+Bn,f(A.Xbb)+' + '+a+' × '+f(B),f(L.ucl))+row('X̄','LC = X̿','',f(L.cl))+row('X̄','LCI = X̿ − '+an+'·'+Bn,f(A.Xbb)+' − '+a+' × '+f(B),f(L.lcl))
+ +row(nm,'LCS = '+upn+'·'+Bn,up+' × '+f(B),f(D.ucl))+row(nm,'LC = '+Bn,'',f(D.cl))+row(nm,'LCI = '+lon+'·'+Bn,lo+' × '+f(B),f(D.lcl))+'</tbody></table></div>';}
+
+function interp(key){
+ const isR=key==='R',dk=isR?'r':'s',mk=isR?'xr':'xs',dn=isR?'R':'S';
+ const dBad=activeFlags(A,dk),mBad=activeFlags(A,mk);
+ let h='<div class="card interp"><h3 style="margin-top:0">Interpretación</h3><p class="note">Se lee primero el gráfico de dispersión: si la variabilidad no es estable, los límites del gráfico de medias carecen de sentido (Montgomery, 2019).</p>';
+ h+='<h4>1. Gráfico '+dn+' (variabilidad) '+(dBad?'<span class="badge bad">Fuera de control</span>':'<span class="badge ok">Estable</span>')+'</h4>'+findings(A,dk,CAUSE_D,'variabilidad');
+ if(!isR&&A.k.B3===0)h+='<p class="note">Con n = '+A.n+' el límite inferior de S es cero; no es posible detectar disminuciones de variabilidad con este gráfico.</p>';
+ if(isR&&A.k.D3===0)h+='<p class="note">Con n = '+A.n+' el límite inferior de R es cero (D₃ = 0); no es posible detectar disminuciones de variabilidad con este gráfico.</p>';
+ h+='<h4>2. Gráfico X̄ (centrado) '+(mBad?'<span class="badge bad">Fuera de control</span>':'<span class="badge ok">Estable</span>')+'</h4>'+findings(A,mk,CAUSE_M,'media');
+ h+='<h4>3. Conclusión integrada</h4>';
+ if(!dBad&&!mBad)h+='<div class="banner ok">El proceso es estable en media y variabilidad. Los límites pueden adoptarse como límites de trabajo para monitoreo continuo (Fase II) y ya es válido evaluar su capacidad en el paso 4.</div>';
+ else if(dBad)h+='<div class="banner bad">La variabilidad no es estable. Investigue las causas asignables en los subgrupos señalados. Si las identifica y corrige, excluya esos subgrupos y recalcule los límites; no los excluya solo para «mejorar» la gráfica. Mientras tanto, los índices de capacidad no son interpretables.</div>';
+ else h+='<div class="banner warn">La variabilidad es estable pero la media muestra señales de desplazamiento. Revise ajustes, lotes y turnos en los subgrupos marcados antes de calcular la capacidad.</div>';
+ if(A.act.length<20)h+='<p class="note">Con '+A.act.length+' subgrupos los límites son estimaciones poco precisas; Montgomery (2019) sugiere de 20 a 25 subgrupos de tamaño 4 o 5 para la Fase I.</p>';
+ return h+'</div>';}
+
+function renderChartSec(key){
+ const out=$(key==='R'?'xrOut':'xsOut');
+ if(!A||!A.ok){out.innerHTML='<div class="banner warn">Capture al menos dos subgrupos completos.</div>';return;}
+ const isR=key==='R',L=isR?A.lim.xr:A.lim.xs,D=isR?A.lim.r:A.lim.s,fm=A.fl[isR?'xr':'xs'],fd=A.fl[isR?'r':'s'];
+ const lab=A.rows.map(r=>r.label),ex=A.rows.map(r=>r.ex),un=S.unit?' ('+S.unit+')':'';
+ let h=chartSVG({title:'Gráfico X̄ — media de cada subgrupo',labels:lab,values:A.rows.map(r=>r.mean),flags:fm,ex,cl:L.cl,ucl:L.ucl,lcl:L.lcl,sigma:L.sigma,zones:S.zones,ylab:'Media'+un});
+ h+=chartSVG({title:isR?'Gráfico R — rango de cada subgrupo':'Gráfico S — desviación estándar de cada subgrupo',labels:lab,values:A.rows.map(r=>isR?r.R:r.s),flags:fd,ex,cl:D.cl,ucl:D.ucl,lcl:D.lcl,sigma:D.sigma,zones:false,floor0:true,hideLcl:D.lcl===0&&false,ylab:(isR?'Rango':'Desv. est.')+un});
+ out.innerHTML=h+limitsTable(key)+interp(key);}
+
+function cls(x){return x>=2?['Clase mundial','ok']:x>=1.33?['Adecuado','ok']:x>=1?['Parcialmente adecuado','warn']:x>=0.67?['No adecuado','bad']:['No adecuado, grave','bad'];}
+function viewUsed(){return S.view||(A?A.rec.pick:'R');}
+function methodUsed(){return S.method==='auto'?viewUsed():S.method;}
+let constKey='';
+function renderConst(){
+ const v=viewUsed(),kk=A&&A.act?A.act.length:0,key=v+'|'+S.n+'|'+kk+'|'+(S.example?1:0);if(key===constKey)return;constKey=key;
+ const lim=v==='R'?['A2','D3','D4']:['A3','B3','B4'],sig=v==='R'?'d2':'c4',use=lim.concat([sig]);
+ const cols=[['A2','A₂'],['A3','A₃'],['c4','c₄'],['B3','B₃'],['B4','B₄'],['d2','d₂'],['d3','d₃'],['D3','D₃'],['D4','D₄']];
+ let h='<h3>Tabla de constantes para gráficos de control</h3>';
+ h+='<div class="banner"><b>¿Cómo se elige la fila?</b> Se entra con <b>n = número de observaciones dentro de cada subgrupo</b> (las columnas x₁ … xₙ de la captura), no con el número de subgrupos. Aquí cada subgrupo tiene n = '+S.n+' observaciones y hay k = '+kk+' subgrupos, así que se usa la fila n = '+S.n+'. El valor de k solo influye en la precisión de X̿ y R̄, no en las constantes.</div>';
+ if(S.example)h+='<div class="banner warn"><b>Nota sobre el ejemplo de la presentación.</b> La diapositiva circula la fila n = 8 (A₂ = 0.373, D₃ = 0.136, D₄ = 1.864), que corresponde a las 8 horas, es decir, al número de subgrupos. Pero X̄ y R de la propia tabla se calculan por fila con 3 datos (día 1, 2 y 3), así que el tamaño de subgrupo es n = 3 (A₂ = 1.023, D₃ = 0, D₄ = 2.575). Con n = 8 los límites de X̄ serían 20.13 y 22.44, y dos subgrupos (09:00 y 10:00) saldrían falsamente de control; con n = 3 son 18.11 y 24.45 y ninguna media se sale. Para usar n = 8 correctamente habría que tener 8 observaciones en cada subgrupo.</div>';
+ h+='<p class="note">Fila resaltada: n = '+S.n+'. Columnas en azul: constantes que usa el gráfico X̄-'+v+' (límites de control: '+lim.map(x=>cols.find(c=>c[0]===x)[1]).join(', ')+'; estimación de σ: '+cols.find(c=>c[0]===sig)[1]+').</p>';
+ h+='<div class="cscroll" id="constScroll"><table class="ct"><thead><tr><th>n</th>'+cols.map(c=>'<th'+(use.includes(c[0])?' class="hl"':'')+'>'+c[1]+'</th>').join('')+'</tr></thead><tbody>';
+ for(let n=2;n<=25;n++){const k=K(n);h+='<tr'+(n===S.n?' class="cur"':'')+'><td>'+n+'</td>'+cols.map(c=>'<td'+(use.includes(c[0])?' class="hl"':'')+'>'+k[c[0]].toFixed(3)+'</td>').join('')+'</tr>';}
+ $('constOut').innerHTML=h+'</tbody></table></div><p class="note">Valores de la tabla «Constantes para gráficos de control» usada en el curso (tres decimales).</p>';
+ const sc=$('constScroll'),tr=sc.querySelector('tr.cur');if(tr)sc.scrollTop=Math.max(0,tr.offsetTop-sc.clientHeight/2);}
+function applyView(){
+ renderConst();
+ const v=viewUsed();$('xrOut').hidden=v!=='R';$('xsOut').hidden=v!=='S';
+ document.querySelectorAll('#seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));
+ $('segHint').textContent=A&&A.rec.pick===v?'Es el gráfico recomendado para n = '+A.n+'.':'Alternativa válida; el recomendado para n = '+(A?A.n:'')+' es X̄-'+(A?A.rec.pick:'R')+'.';}
+function capCard(name,sub,v,lo,hi,den){const c=cls(v);
+ return '<div class="card"><div class="note"><b>'+name+'</b> · '+sub+'</div><div class="big">'+fi(v)+'</div>'+(Number.isFinite(v)?'<div style="margin:4px 0"><span class="badge '+c[1]+'">'+c[0]+'</span></div>':'')+(Number.isFinite(lo)?'<div class="note mono">IC 95 % aprox.: '+fi(lo)+' a '+fi(hi)+'</div>':'')+'<div class="note">'+den+'</div></div>';}
+
+function renderCap(){
+ const out=$('capOut');
+ if(!A||!A.ok){out.innerHTML='<div class="banner warn">Capture al menos dos subgrupos completos.</div>';return;}
+ const m=methodUsed(),c=capacity(S,A,m);
+ if(c.err==='none'){out.innerHTML='<div class="banner warn">Capture el LIE y/o el LSE en el paso 1 para calcular los índices.</div>';return;}
+ if(c.err==='order'){out.innerHTML='<div class="banner bad">El LSE debe ser mayor que el LIE.</div>';return;}
+ if(c.err==='sigma0'){out.innerHTML='<div class="banner bad">La variabilidad estimada es cero; revise los datos.</div>';return;}
+ const dk=m==='R'?'r':'s',mk=m==='R'?'xr':'xs',stable=activeFlags(A,dk)+activeFlags(A,mk)===0;
+ const chk=(t,ok,w)=>'<tr><td>'+t+'</td><td><span class="badge '+(ok?'ok':w?'warn':'bad')+'">'+(ok?'Cumple':'Revisar')+'</span></td></tr>';
+ let h='<div class="banner'+(stable?' ok':' bad')+'">'+(stable?'El proceso está en control estadístico con el gráfico X̄-'+m+': los índices tienen sentido como medida de capacidad.':'El proceso no está en control con el gráfico X̄-'+m+'. Los índices describen un proceso inestable y no deben usarse para predecir su desempeño (Montgomery, 2019). Corrija las causas asignables en el paso 3.')+'</div>';
+ h+='<div class="cards">'+capCard('Cp','capacidad potencial',c.Cp,c.CpLo,c.CpHi,'Compara la tolerancia con 6σ; ignora si el proceso está centrado.')
+  +capCard('Cpk','capacidad real',c.Cpk,c.CpkLo,c.CpkHi,'Toma el lado más cercano a su especificación: min(Cpu, Cpl).')
+  +capCard('Cpm','capacidad respecto al objetivo',c.Cpm,NaN,NaN,Number.isFinite(c.Cpm)?'Penaliza alejarse de T = '+f(c.T)+' (función de pérdida de Taguchi).':'Requiere LIE y LSE.')+'</div>';
+ h+='<h3>Resumen numérico</h3><div class="scroll"><table><thead><tr><th>Concepto</th><th>Valor</th><th>Concepto</th><th>Valor</th></tr></thead><tbody>'
+  +'<tr><td>Media estimada μ̂ = X̿</td><td class="m">'+f(c.mu)+'</td><td>σ̂ dentro (corto plazo)</td><td class="m">'+f(c.sw)+'</td></tr>'
+  +'<tr><td>Cpu</td><td class="m">'+fi(c.Cpu)+'</td><td>Cpl</td><td class="m">'+fi(c.Cpl)+'</td></tr>'
+  +'<tr><td>Índice de descentrado k</td><td class="m">'+fi(c.k)+'</td><td>σ̂ global (largo plazo)</td><td class="m">'+f(c.so)+'</td></tr>'
+  +'<tr><td>Pp</td><td class="m">'+fi(c.Pp)+'</td><td>Ppk</td><td class="m">'+fi(c.Ppk)+'</td></tr>'
+  +'<tr><td>% fuera de LIE (ppm)</td><td class="m">'+fp(c.pL)+'</td><td>% fuera de LSE (ppm)</td><td class="m">'+fp(c.pU)+'</td></tr>'
+  +'<tr><td><b>Total esperado (ppm)</b></td><td class="m"><b>'+fp(c.ppm)+'</b></td><td>Z = 3·Cpk</td><td class="m">'+fi(3*c.Cpk)+'</td></tr></tbody></table></div>';
+ h+='<p class="note">ppm teóricos bajo normalidad, con σ̂ dentro de subgrupos. Los intervalos de confianza son aproximados (χ² por Wilson-Hilferty para Cp; fórmula de Bissell para Cpk) y suponen datos normales e independientes.</p>';
+ h+=histSVG(c,A);
+ h+='<h3>Verificación de supuestos</h3><div class="scroll"><table><tbody>'
+  +chk('Proceso estable en control estadístico',stable)
+  +chk('Al menos 20 subgrupos ('+A.act.length+' disponibles)',A.act.length>=20,true)
+  +chk('Al menos 100 observaciones ('+A.N+' disponibles)',A.N>=100,true)
+  +chk('Indicador de normalidad Jarque-Bera: sesgo '+fi(A.g1)+', curtosis excedente '+fi(A.g2)+', p ≈ '+(A.JBp<0.001?'< 0.001':A.JBp.toFixed(3)),A.JBp>0.05,true)
+  +'</tbody></table></div><p class="note">Jarque-Bera es una prueba asintótica; con pocas observaciones solo orienta. Para decisiones formales use además un gráfico de probabilidad normal.</p>';
+ h+=capInterp(c)+capSteps(c);
+ out.innerHTML=h;}
+
+function capInterp(c){
+ let h='<div class="card interp"><h3 style="margin-top:0">Interpretación</h3><ul>';
+ if(Number.isFinite(c.Cp)){
+  const cp=cls(c.Cp),ck=cls(c.Cpk);
+  h+='<li><b>Cp = '+fi(c.Cp)+'</b> ('+cp[0].toLowerCase()+'). La dispersión natural (6σ̂ = '+f(6*c.sw)+') ocupa '+(100/c.Cp).toFixed(0)+' % de la tolerancia ('+f(c.usl-c.lsl)+').</li>';
+  h+='<li><b>Cpk = '+fi(c.Cpk)+'</b> ('+ck[0].toLowerCase()+'). La media está a '+f(Math.abs(c.mu-c.mid))+' del punto medio de la tolerancia (k = '+fi(c.k)+').'+(c.Cpk<0?' La media queda fuera de especificación.':'')+'</li>';
+  if(c.Cp>=1.33&&c.Cpk<1.33)h+='<li><b>Diagnóstico:</b> la variabilidad cabe en la tolerancia pero el proceso está descentrado. Basta ajustar la media hacia '+f(c.mid)+'; no se necesita reducir variación.</li>';
+  else if(c.Cp<1.33)h+='<li><b>Diagnóstico:</b> el problema es de variabilidad. Centrar el proceso no basta; hay que reducir σ (mantenimiento, materia prima, método, medición) o negociar la tolerancia.</li>';
+  else h+='<li><b>Diagnóstico:</b> proceso capaz y razonablemente centrado. Mantenga el monitoreo con los límites de control.</li>';
+  if(Number.isFinite(c.Cpm))h+='<li><b>Cpm = '+fi(c.Cpm)+'</b> frente a Cp = '+fi(c.Cp)+'. '+(Math.abs(c.mu-c.T)<1e-9*Math.max(1,Math.abs(c.T))?'La media coincide con T, así que Cpm = Cp.':'Cpm cae por la distancia entre μ̂ y T ('+f(Math.abs(c.mu-c.T))+'). Aun dentro de especificación, alejarse del objetivo implica pérdida de calidad.')+'</li>';
+  if(Math.abs(c.T-c.mid)>1e-9)h+='<li>El objetivo T ('+f(c.T)+') no coincide con el punto medio ('+f(c.mid)+'): Cpk y Cpm miden cosas distintas y conviene interpretarlos juntos.</li>';
+ }else h+='<li>Con una sola especificación solo se define Cpk = '+fi(c.Cpk)+'; Cp y Cpm requieren LIE y LSE.</li>';
+ h+='<li><b>Desempeño esperado:</b> alrededor de '+fp(c.ppm)+' ppm fuera de especificación, si la distribución es normal y el proceso se mantiene estable.</li>';
+ if(c.Pp&&Number.isFinite(c.Ppk)&&c.Ppk<0.85*c.Cpk)h+='<li>Ppk ('+fi(c.Ppk)+') es claramente menor que Cpk ('+fi(c.Cpk)+'): hay variación entre subgrupos que la variación interna no explica. Revise estabilidad en el tiempo.</li>';
+ return h+'</ul></div>';}
+
+function capSteps(c){
+ const r=(a,b,v)=>'<tr><td>'+a+'</td><td class="m">'+b+'</td><td class="m"><b>'+v+'</b></td></tr>',s=c.sw;
+ let h='<h3>Cálculo paso a paso con sus datos</h3><div class="scroll"><table><thead><tr><th>Índice</th><th>Sustitución</th><th>Resultado</th></tr></thead><tbody>';
+ h+=r('σ̂ ('+(c.m==='R'?'R̄/d₂':'S̄/c₄')+')',c.m==='R'?f(A.Rbar)+' / '+A.k.d2:f(A.Sbar)+' / '+A.k.c4,f(s));
+ if(c.hasL&&c.hasU)h+=r('Cp = (LSE − LIE) / 6σ̂','('+f(c.usl)+' − '+f(c.lsl)+') / (6 × '+f(s)+')',fi(c.Cp));
+ if(c.hasU)h+=r('Cpu = (LSE − μ̂) / 3σ̂','('+f(c.usl)+' − '+f(c.mu)+') / (3 × '+f(s)+')',fi(c.Cpu));
+ if(c.hasL)h+=r('Cpl = (μ̂ − LIE) / 3σ̂','('+f(c.mu)+' − '+f(c.lsl)+') / (3 × '+f(s)+')',fi(c.Cpl));
+ h+=r('Cpk = mín(Cpu, Cpl)','',fi(c.Cpk));
+ if(Number.isFinite(c.Cpm))h+=r('Cpm = (LSE − LIE) / 6√(σ̂² + (μ̂ − T)²)','(' +f(c.usl-c.lsl)+') / (6 × '+f(c.tau)+')',fi(c.Cpm));
+ return h+'</tbody></table></div>';}
+
+function summaryText(){
+ if(!A||!A.ok)return 'Sin datos suficientes.';
+ const m=methodUsed(),c=capacity(S,A,m),L=[];
+ L.push('Variable: '+S.variable+(S.unit?' ('+S.unit+')':'')+' | n = '+A.n+', subgrupos = '+A.act.length+', N = '+A.N);
+ L.push('X̿ = '+f(A.Xbb)+', R̄ = '+f(A.Rbar)+', S̄ = '+f(A.Sbar));
+ L.push('Gráfico X̄: LCI = '+f(A.lim.xr.lcl)+', LC = '+f(A.lim.xr.cl)+', LCS = '+f(A.lim.xr.ucl)+' (con R̄)');
+ L.push('Gráfico R: LCI = '+f(A.lim.r.lcl)+', LC = '+f(A.lim.r.cl)+', LCS = '+f(A.lim.r.ucl));
+ L.push('Gráfico X̄ (S): LCI = '+f(A.lim.xs.lcl)+', LCS = '+f(A.lim.xs.ucl)+' | Gráfico S: LCI = '+f(A.lim.s.lcl)+', LC = '+f(A.lim.s.cl)+', LCS = '+f(A.lim.s.ucl));
+ L.push('Gráfico recomendado: X̄-'+A.rec.pick);
+ L.push('Señales activas (X̄-'+m+'): dispersión '+activeFlags(A,m==='R'?'r':'s')+', medias '+activeFlags(A,m==='R'?'xr':'xs'));
+ if(!c.err)L.push('σ̂ = '+f(c.sw)+' | Cp = '+fi(c.Cp)+', Cpk = '+fi(c.Cpk)+', Cpm = '+fi(c.Cpm)+', Pp = '+fi(c.Pp)+', Ppk = '+fi(c.Ppk)+' | ppm esperados = '+fp(c.ppm));
+ return L.join('\n');}
+
+const FX=s=>'<div class="fx">'+s+'</div>';
+function renderTheory(){
+ const ac=(t,b,o)=>'<details class="acc"'+(o?' open':'')+'><summary>'+t+'</summary><div class="prose">'+b+'</div></details>';
+ $('theory').innerHTML=
+ ac('Causas comunes, causas especiales y la lógica de Shewhart','<p>Shewhart (1931) separó la variación inherente al sistema (causas comunes) de la que proviene de eventos identificables (causas especiales o asignables). Un gráfico de control no mide si el producto cumple especificaciones; mide si el proceso es estable y, por tanto, predecible.</p><p>Con límites a ±3σ y datos normales, la probabilidad de que un punto caiga fuera por puro azar es de aproximadamente 0.0027, es decir, una falsa alarma cada 370 subgrupos en promedio (Montgomery, 2019). En la <b>Fase I</b> se analizan datos históricos para calcular límites y depurar causas asignables; en la <b>Fase II</b> esos límites se usan para vigilar el proceso.</p><p>Los límites de control salen de los datos (voz del proceso); los límites de especificación vienen del cliente o del diseño (voz del cliente). No deben mezclarse en la misma gráfica de medias.</p>',true)
+ +ac('Construcción del gráfico X̄-R en cuatro pasos','<p>1) Calcule la media y el rango de cada subgrupo, la media de medias y el rango medio. 2) Obtenga los límites con las constantes de la tabla según n. 3) Grafique y trace LC, LCS y LCI. 4) Analice y concluya.</p>'+FX('Gráfico X̄: LCS = X̿ + A₂R̄ · LC = X̿ · LCI = X̿ − A₂R̄')+FX('Gráfico R: LCS = D₄R̄ · LC = R̄ · LCI = D₃R̄')+'<p>Estimación de la desviación estándar del proceso: σ̂ = R̄/d₂. El rango es útil para subgrupos pequeños, pero pierde eficiencia conforme n crece.</p>')
+ +ac('Construcción del gráfico X̄-S','<p>Se sustituye el rango por la desviación estándar muestral (con n − 1 en el denominador) de cada subgrupo.</p>'+FX('Gráfico X̄: LCS = X̿ + A₃S̄ · LC = X̿ · LCI = X̿ − A₃S̄')+FX('Gráfico S: LCS = B₄S̄ · LC = S̄ · LCI = B₃S̄')+'<p>Estimación: σ̂ = S̄/c₄. Con subgrupos grandes, o de tamaño variable, el gráfico S es la opción preferible (Montgomery, 2019; Gutiérrez y De la Vara, 2013).</p>')
+ +ac('Por qué las constantes dependen de n (tamaño del subgrupo) y no de k','<p>Las constantes de la tabla salen de la distribución del rango y de la desviación estándar de <i>n observaciones</i> normales. Por ejemplo, d₂ es el rango esperado de n observaciones de una normal estándar, y de ahí se obtienen las demás (Montgomery, 2019):</p>'+FX('A₂ = 3 / (d₂√n) · D₃ = 1 − 3d₃/d₂ (mínimo 0) · D₄ = 1 + 3d₃/d₂')+'<p>Comprobación con el ejemplo de PVC: con n = 3, 3/(1.693·√3) = 1.023; con n = 8, 3/(2.847·√8) = 0.373. Cada valor es válido solo si los rangos con los que se calculó R̄ provienen de subgrupos de ese mismo tamaño. En el ejemplo, cada R es el rango de 3 datos, por lo que corresponde la fila n = 3 y σ̂ = R̄/d₂ = 3.1/1.693 = 1.831. Con la fila 8 se obtendría σ̂ = 1.089, subestimando la variabilidad y generando falsas alarmas.</p>')
+ +ac('Reglas para detectar patrones no aleatorios','<p>Además del punto fuera de límites, la aplicación puede evaluar las reglas de Western Electric (1956) en la numeración de Nelson (1984): 1) un punto más allá de 3σ; 2) nueve puntos seguidos del mismo lado de la línea central; 3) seis en ascenso o descenso; 4) catorce alternando; 5) dos de tres más allá de 2σ; 6) cuatro de cinco más allá de 1σ. Cada regla adicional aumenta la sensibilidad y también la tasa de falsas alarmas, por lo que conviene activar solo las que el equipo sepa interpretar.</p>')
+ +ac('Qué miden Cp, Cpk y Cpm','<p>La capacidad compara lo que el proceso produce (voz del proceso, 6σ) con lo que el cliente permite (la tolerancia).</p><ul><li><b>Cp</b> es la capacidad potencial: cuántas veces cabe la dispersión natural en la tolerancia, suponiendo el proceso perfectamente centrado.</li><li><b>Cpk</b> es la capacidad real: considera también la posición de la media y se rige por el lado más cercano a su límite (Kane, 1986).</li><li><b>Cpm</b> añade la distancia entre la media y el valor objetivo T, de acuerdo con la idea de pérdida cuadrática de Taguchi (Chan, Cheng y Spiring, 1988).</li></ul>'+FX('Cp = (LSE − LIE) / 6σ')+FX('Cpu = (LSE − μ) / 3σ · Cpl = (μ − LIE) / 3σ · Cpk = mín(Cpu, Cpl)')+FX('Cpm = (LSE − LIE) / 6√(σ² + (μ − T)²) = Cp / √(1 + ((μ − T)/σ)²)'),true)
+ +ac('Relaciones útiles entre los índices','<p>Si k = |μ − m| / ((LSE − LIE)/2) es el índice de descentrado (m es el punto medio), entonces Cpk = Cp(1 − k). Por eso Cpk ≤ Cp, con igualdad solo cuando el proceso está centrado. Además, Cpm ≤ Cp, y Cpm se acerca a Cp solo cuando μ coincide con T.</p><p>Un Cp alto con Cpk bajo señala descentrado; un Cp bajo señala exceso de variabilidad. Un Cpk razonable con un Cpm bajo indica que el proceso cumple especificaciones pero se aleja del objetivo.</p>')
+ +ac('Valores de referencia','<div class="scroll"><table><thead><tr><th>Situación (Montgomery, 2019)</th><th>Bilateral</th><th>Unilateral</th></tr></thead><tbody><tr><td>Proceso existente</td><td class="m">1.33</td><td class="m">1.25</td></tr><tr><td>Proceso nuevo</td><td class="m">1.50</td><td class="m">1.45</td></tr><tr><td>Parámetro crítico (seguridad, resistencia), existente</td><td class="m">1.50</td><td class="m">1.45</td></tr><tr><td>Parámetro crítico, nuevo</td><td class="m">1.67</td><td class="m">1.60</td></tr></tbody></table></div><p>Gutiérrez y De la Vara (2013) clasifican el Cp en cuatro categorías: clase mundial (≥ 2), adecuado (> 1.33), parcialmente adecuado (entre 1 y 1.33) y no adecuado (< 1); esta aplicación usa esas bandas de forma orientativa también para Cpk y Cpm. Las normas de cliente, como el manual SPC del AIAG (2005), pueden fijar umbrales propios.</p>')
+ +ac('Cp y Cpk frente a Pp y Ppk','<p>Cp y Cpk usan σ dentro de subgrupos (R̄/d₂ o S̄/c₄), que refleja variación de corto plazo. Pp y Ppk usan la desviación estándar de todas las observaciones, que incluye también la variación entre subgrupos. Si Ppk es mucho menor que Cpk, el proceso se desplaza con el tiempo.</p>')
+ +ac('Supuestos y limitaciones','<ul><li><b>Estabilidad:</b> sin control estadístico, los índices no describen un proceso predecible.</li><li><b>Normalidad:</b> los ppm y los intervalos suponen distribución normal; con datos sesgados, transforme o use métodos no paramétricos.</li><li><b>Tamaño de muestra:</b> los índices son estimaciones; con pocos datos su incertidumbre es grande (Bissell, 1990), por eso se muestra un intervalo de confianza.</li><li><b>Medición:</b> si el sistema de medición añade mucha variación, la capacidad aparente es menor que la real.</li><li><b>Constantes:</b> se usan las de la tabla del curso con tres decimales; los resultados pueden diferir ligeramente de software que calcula c₄ y d₂ exactos.</li></ul>');}
+
+const KEY='spc-variables-v1';
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function load(){try{const t=localStorage.getItem(KEY);if(!t)return;const o=JSON.parse(t);
+ if(o&&Array.isArray(o.rows)&&o.n>=2&&o.n<=25&&o.rules)S=Object.assign(JSON.parse(JSON.stringify(EXAMPLE)),o);}catch(e){}}
+function touch(){if(S.example){S.example=false;}}
+
+function renderTable(){
+ const n=S.n;let h='<thead><tr><th class="c">#</th><th>Etiqueta</th>';
+ for(let j=0;j<n;j++)h+='<th>x<sub>'+(j+1)+'</sub></th>';
+ h+='<th>'+XB+'</th><th>R</th><th>S</th><th class="c" title="Excluir del cálculo de límites">Excl.</th><th></th></tr></thead><tbody>';
+ S.rows.forEach((r,i)=>{
+  h+='<tr data-i="'+i+'"><td class="c">'+(i+1)+'</td><td><input class="lab" data-f="label" value="'+esc(r.label)+'" aria-label="Etiqueta del subgrupo '+(i+1)+'"></td>';
+  for(let j=0;j<n;j++)h+='<td><input class="v" inputmode="decimal" data-j="'+j+'" value="'+esc(r.v[j]==null?'':r.v[j])+'" aria-label="Subgrupo '+(i+1)+', observación '+(j+1)+'"></td>';
+  h+='<td class="o" id="m'+i+'">—</td><td class="o" id="r'+i+'">—</td><td class="o" id="s'+i+'">—</td><td class="c"><input type="checkbox" data-f="ex"'+(r.ex?' checked':'')+' aria-label="Excluir subgrupo '+(i+1)+'"></td><td><button type="button" class="x" data-f="del" title="Eliminar subgrupo" aria-label="Eliminar subgrupo '+(i+1)+'">×</button></td></tr>';});
+ $('tbl').innerHTML=h+'</tbody>';}
+
+function refreshRowStats(){
+ const map={};if(A&&A.rows)A.rows.forEach(r=>{map[r.i]=r;});
+ S.rows.forEach((r,i)=>{const q=map[i],set=(id,v)=>{const e=$(id+i);if(e)e.textContent=v;};
+  set('m',q?f(q.mean):'—');set('r',q?f(q.R):'—');set('s',q?f(q.s):'—');});}
+
+function syncControls(){
+ ['variable','unit','lsl','tgt','usl'].forEach(id=>{$(id).value=S[id]==null?'':S[id];});
+ $('nInput').value=S.n;$('dec').value=S.dec;$('method').value=S.method;$('zones').checked=!!S.zones;
+ document.querySelectorAll('#rulesBox input').forEach(c=>{c.checked=!!S.rules[c.dataset.r];});
+ const b=$('exBanner');b.hidden=!S.example;
+ if(S.example)b.innerHTML='Está viendo el ejemplo de tubos de PVC de la presentación: 8 subgrupos de n = 3. Los valores de LIE, T y LSE son <b>ilustrativos</b> y no provienen del ejemplo original. Cualquier cambio que haga reemplaza el modo de ejemplo.';}
+
+function update(){
+ A=analyze(S);renderStats();renderVerdict();renderChartSec('R');renderChartSec('S');applyView();renderCap();refreshRowStats();
+ $('exBanner').hidden=!S.example;save();}
+
+function resizeRows(){S.rows.forEach(r=>{r.v=r.v.slice(0,S.n);while(r.v.length<S.n)r.v.push('');});}
+
+function importPaste(){
+ const lines=$('pasteTxt').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean),forceLab=$('pasteLabel').checked,isN=t=>t!==''&&Number.isFinite(Number(t.replace(',','.')));
+ const parsed=[];
+ lines.forEach(l=>{const tk=(/[\t;]/.test(l)?l.split(/[\t;]+/):l.split(/[,\s]+/)).map(t=>t.trim()).filter(t=>t!=='');
+  if(!tk.length)return;let lab='';
+  if(!isN(tk[0])||forceLab)lab=tk.shift();
+  const vals=tk.filter(isN);if(vals.length>=2)parsed.push({label:lab,v:vals});});
+ if(!parsed.length){$('autoExMsg').textContent='No se encontraron filas con al menos dos valores numéricos.';return;}
+ const n=Math.min(25,Math.max(2,parsed[0].v.length));
+ S.n=n;S.rows=parsed.filter(p=>p.v.length>=n).map((p,i)=>({label:p.label||String(i+1),v:p.v.slice(0,n),ex:false}));
+ S.example=false;$('pastePanel').hidden=true;$('autoExMsg').textContent='';syncControls();renderTable();update();}
+
+function autoExclude(){
+ const m=methodUsed();let rounds=0,removed=[];
+ while(rounds++<10){const a=analyze(S);if(!a.ok)break;
+  const dk=m==='R'?'r':'s',mk=m==='R'?'xr':'xs',hit=[];
+  a.rows.forEach((r,j)=>{if(!r.ex&&(a.fl[dk][j].includes(1)||a.fl[mk][j].includes(1)))hit.push(r);});
+  if(!hit.length||a.act.length-hit.length<2)break;
+  hit.forEach(r=>{S.rows[r.i].ex=true;removed.push(r.label);});}
+ touch();renderTable();update();
+ $('autoExMsg').textContent=removed.length?'Excluidos: '+removed.join(', ')+'. Hágalo solo si identificó una causa asignable para cada uno.':'No hay puntos fuera de los límites que excluir.';}
+
+function bind(){
+ ['variable','unit','lsl','tgt','usl'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=e.target.value;touch();update();}));
+ $('nInput').addEventListener('change',e=>{const n=Math.round(Number(e.target.value));if(n>=2&&n<=25){S.n=n;resizeRows();touch();renderTable();update();}else e.target.value=S.n;});
+ $('dec').addEventListener('change',e=>{const d=Math.round(Number(e.target.value));if(d>=1&&d<=6){S.dec=d;update();}else e.target.value=S.dec;});
+ $('method').addEventListener('change',e=>{S.method=e.target.value;update();});
+ $('zones').addEventListener('change',e=>{S.zones=e.target.checked;update();});
+ $('rulesBox').addEventListener('change',e=>{if(e.target.dataset.r){S.rules[e.target.dataset.r]=e.target.checked;update();}});
+ const tbl=$('tbl');
+ tbl.addEventListener('input',e=>{const tr=e.target.closest('tr[data-i]');if(!tr)return;const i=+tr.dataset.i,t=e.target;
+  if(t.dataset.j!==undefined)S.rows[i].v[+t.dataset.j]=t.value;else if(t.dataset.f==='label')S.rows[i].label=t.value;touch();update();});
+ tbl.addEventListener('change',e=>{const tr=e.target.closest('tr[data-i]');if(tr&&e.target.dataset.f==='ex'){S.rows[+tr.dataset.i].ex=e.target.checked;touch();update();}});
+ tbl.addEventListener('click',e=>{const b=e.target.closest('button[data-f="del"]');if(!b)return;S.rows.splice(+b.closest('tr').dataset.i,1);touch();renderTable();update();});
+ $('btnAdd').addEventListener('click',()=>{S.rows.push({label:String(S.rows.length+1),v:Array(S.n).fill(''),ex:false});touch();renderTable();update();
+  const inp=tbl.querySelector('tr:last-child input.v');if(inp)inp.focus();});
+ $('btnExample').addEventListener('click',()=>{S=JSON.parse(JSON.stringify(EXAMPLE));syncControls();renderTable();update();});
+ $('btnClear').addEventListener('click',()=>{S.rows=[];for(let i=0;i<5;i++)S.rows.push({label:String(i+1),v:Array(S.n).fill(''),ex:false});S.example=false;$('autoExMsg').textContent='';syncControls();renderTable();update();});
+ $('btnPasteToggle').addEventListener('click',()=>{const p=$('pastePanel');p.hidden=!p.hidden;});
+ $('btnImport').addEventListener('click',importPaste);
+ $('btnAutoEx').addEventListener('click',autoExclude);
+ document.addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(!b)return;
+  S.view=b.dataset.view;update();if(b.closest('#verdict'))$('graficos').scrollIntoView({behavior:'smooth'});});
+ $('btnCopy').addEventListener('click',async()=>{const t=summaryText(),box=$('sumBox');
+  try{await navigator.clipboard.writeText(t);$('copyMsg').textContent='Resumen copiado.';box.hidden=true;}
+  catch(e){box.value=t;box.hidden=false;box.focus();box.select();$('copyMsg').textContent='Seleccione y copie el texto de abajo.';}});}
+
+load();syncControls();renderTheory();renderTable();bind();update();
+})();
+</script>
+</body></html>
