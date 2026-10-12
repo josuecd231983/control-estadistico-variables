@@ -72,7 +72,7 @@ button.x:hover{color:var(--bad)}
 .badge.ok{background:var(--okSoft);color:var(--ok)}.badge.warn{background:var(--warnSoft);color:var(--warn)}.badge.bad{background:var(--badSoft);color:var(--bad)}
 .verdict{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:16px;display:grid;grid-template-columns:auto 1fr;gap:6px 22px;align-items:center}
 .verdict .vv{font:600 2.4rem/1 var(--sans);color:var(--accent);grid-row:span 2}
-.verdict .vk{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-weight:600}
+.verdict .vk{font-size:.82rem;letter-spacing:.02em;color:var(--ink2);font-weight:600}
 @media (max-width:520px){.verdict{grid-template-columns:1fr}.verdict .vv{grid-row:auto}}
 .chart{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;margin-block:12px}
 .chart svg{display:block;min-width:660px;width:100%;height:auto}
@@ -174,6 +174,7 @@ ol.refs li{margin:.5rem 0}
  <p class="note">Solo se usan subgrupos completos. Marque «Excl.» para sacar un subgrupo del cálculo de los límites cuando haya identificado una causa asignable; seguirá visible en las gráficas con marcador hueco.</p>
  <div class="row"><button class="btn sec2" id="btnAutoEx" type="button">Excluir subgrupos fuera de control y recalcular</button><span class="note" id="autoExMsg"></span></div>
  <h3>Estadísticos globales</h3>
+ <p class="note">Notación: <b>n</b> = observaciones dentro de cada subgrupo (tamaño de muestra); <b>k</b> = número de subgrupos tomados; <b>n·k</b> = total de observaciones.</p>
  <div class="tiles" id="gstats"></div>
 </section>
 
@@ -449,7 +450,7 @@ function renderStats(){
  const g=$('gstats');
  if(!A||!A.ok){g.innerHTML='<div class="banner warn" style="grid-column:1/-1">Capture al menos dos subgrupos completos para calcular.</div>';return;}
  const t=(k,v)=>'<div class="tile"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>',ex=A.rows.length-A.act.length;
- g.innerHTML=t('Subgrupos válidos',A.act.length+(ex?' <small>(+'+ex+' excl.)</small>':''))+t('Observaciones N',A.N)+t('Media de medias '+XBB,f(A.Xbb))+t('Rango medio '+RB,f(A.Rbar))+t('Desv. est. media '+SB,f(A.Sbar))+t('σ̂ = R̄/d₂',f(A.sig.R))+t('σ̂ = S̄/c₄',f(A.sig.S));}
+ g.innerHTML=t('Tamaño de subgrupo n',A.n)+t('Número de subgrupos k',A.act.length+(ex?' <small>(+'+ex+' excl.)</small>':''))+t('Observaciones totales n·k',A.N)+t('Media de medias '+XBB,f(A.Xbb))+t('Rango medio '+RB,f(A.Rbar))+t('Desv. est. media '+SB,f(A.Sbar))+t('σ̂ = R̄/d₂',f(A.sig.R))+t('σ̂ = S̄/c₄',f(A.sig.S));}
 
 function renderVerdict(){
  const el=$('verdict');if(!A||!A.ok){el.innerHTML='';return;}
@@ -488,7 +489,7 @@ function interp(key){
  if(!dBad&&!mBad)h+='<div class="banner ok">El proceso es estable en media y variabilidad. Los límites pueden adoptarse como límites de trabajo para monitoreo continuo (Fase II) y ya es válido evaluar su capacidad en el paso 4.</div>';
  else if(dBad)h+='<div class="banner bad">La variabilidad no es estable. Investigue las causas asignables en los subgrupos señalados. Si las identifica y corrige, excluya esos subgrupos y recalcule los límites; no los excluya solo para «mejorar» la gráfica. Mientras tanto, los índices de capacidad no son interpretables.</div>';
  else h+='<div class="banner warn">La variabilidad es estable pero la media muestra señales de desplazamiento. Revise ajustes, lotes y turnos en los subgrupos marcados antes de calcular la capacidad.</div>';
- if(A.act.length<20)h+='<p class="note">Con '+A.act.length+' subgrupos los límites son estimaciones poco precisas; Montgomery (2019) sugiere de 20 a 25 subgrupos de tamaño 4 o 5 para la Fase I.</p>';
+ if(A.act.length<20)h+='<p class="note">Con k = '+A.act.length+' subgrupos los límites son estimaciones poco precisas; Montgomery (2019) sugiere de 20 a 25 subgrupos de tamaño 4 o 5 para la Fase I.</p>';
  return h+'</div>';}
 
 function renderChartSec(key){
@@ -548,8 +549,8 @@ function renderCap(){
  h+=histSVG(c,A);
  h+='<h3>Verificación de supuestos</h3><div class="scroll"><table><tbody>'
   +chk('Proceso estable en control estadístico',stable)
-  +chk('Al menos 20 subgrupos ('+A.act.length+' disponibles)',A.act.length>=20,true)
-  +chk('Al menos 100 observaciones ('+A.N+' disponibles)',A.N>=100,true)
+  +chk('Al menos 20 subgrupos (k = '+A.act.length+')',A.act.length>=20,true)
+  +chk('Al menos 100 observaciones (n·k = '+A.N+')',A.N>=100,true)
   +chk('Indicador de normalidad Jarque-Bera: sesgo '+fi(A.g1)+', curtosis excedente '+fi(A.g2)+', p ≈ '+(A.JBp<0.001?'< 0.001':A.JBp.toFixed(3)),A.JBp>0.05,true)
   +'</tbody></table></div><p class="note">Jarque-Bera es una prueba asintótica; con pocas observaciones solo orienta. Para decisiones formales use además un gráfico de probabilidad normal.</p>';
  h+=capInterp(c)+capSteps(c);
@@ -585,7 +586,7 @@ function capSteps(c){
 function summaryText(){
  if(!A||!A.ok)return 'Sin datos suficientes.';
  const m=methodUsed(),c=capacity(S,A,m),L=[];
- L.push('Variable: '+S.variable+(S.unit?' ('+S.unit+')':'')+' | n = '+A.n+', subgrupos = '+A.act.length+', N = '+A.N);
+ L.push('Variable: '+S.variable+(S.unit?' ('+S.unit+')':'')+' | n = '+A.n+' (tamaño de subgrupo), k = '+A.act.length+' (número de subgrupos), n·k = '+A.N+' observaciones');
  L.push('X̿ = '+f(A.Xbb)+', R̄ = '+f(A.Rbar)+', S̄ = '+f(A.Sbar));
  L.push('Gráfico X̄: LCI = '+f(A.lim.xr.lcl)+', LC = '+f(A.lim.xr.cl)+', LCS = '+f(A.lim.xr.ucl)+' (con R̄)');
  L.push('Gráfico R: LCI = '+f(A.lim.r.lcl)+', LC = '+f(A.lim.r.cl)+', LCS = '+f(A.lim.r.ucl));
