@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
-<title>Control Estadístico de Variables</title>
+<title>Control Estadístico de la Calidad</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
 <style>
 /* Concepto: hoja de trabajo de laboratorio de calidad. Datos en mono, explicaciones en serif, controles en sans. */
@@ -124,6 +124,21 @@ details.acc>div{padding:0 1rem 1rem}
 ol.refs{font-family:var(--serif);padding-left:1.4rem}
 ol.refs li{margin:.5rem 0}
 @media (prefers-reduced-motion:no-preference){.btn{transition:filter .15s}}
+.maintabs{display:flex;gap:10px;flex-wrap:wrap;margin-block:6px 4px}
+.maintabs button{flex:1 1 260px;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-bottom:4px solid var(--line);border-radius:6px 6px 0 0;padding:.7rem 1rem;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.maintabs button b{font:600 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.maintabs button span{font:600 1.05rem/1.25 var(--sans)}
+.maintabs button small{color:var(--ink2);font-size:.82rem}
+.maintabs button[aria-selected="true"]{border-color:var(--accent);border-bottom-color:var(--accent);background:var(--accentSoft)}
+.maintabs button[aria-selected="true"] b{color:var(--accent)}
+.maintabs button:hover{border-bottom-color:var(--accent)}
+.navswitch{margin-left:auto;white-space:nowrap;font:600 .85rem var(--sans);color:var(--accent);background:transparent;border:1px solid var(--accent);border-radius:4px;padding:.3rem .7rem;cursor:pointer}
+.navswitch:hover{background:var(--accentSoft)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--surface);cursor:pointer}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accentSoft)}
+.opt span{display:flex;flex-direction:column;gap:2px}
+.opt small{color:var(--ink2);font-size:.82rem}
 .po{display:none}
 .phead h1{font-size:1.4rem}.phead p{margin:.2rem 0;color:var(--ink2)}
 @media print{
@@ -146,7 +161,8 @@ ol.refs li{margin:.5rem 0}
  table.dt input[type=checkbox]{width:auto}
  button.x{display:none}
  #capacidad{break-before:page}
- body:not(.pr-theory) #teoria,body:not(.pr-theory) #refs{display:none}
+ body:not(.pr-theory) #teoria,body:not(.pr-theory) #refs,body:not(.pr-theory) #a-teoria,body:not(.pr-theory) #a-refs{display:none}
+ .navswitch{display:none}
 }
 </style>
 </head><body>
@@ -154,12 +170,18 @@ ol.refs li{margin:.5rem 0}
 <header class="top">
  <svg width="46" height="34" viewBox="0 0 46 34" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 8h42M2 26h42" stroke-dasharray="4 3" opacity=".6"/><path d="M2 17h42" opacity=".6"/><path d="M3 18l8-5 8 7 8-9 8 8 8-4" stroke-linejoin="round"/></svg>
  <div>
-  <h1>Control Estadístico de Variables</h1>
-  <p class="sub">Gráficos X̄-R y X̄-S, criterio de elección y capacidad de proceso (Cp, Cpk, Cpm)</p>
+  <h1>Control Estadístico de la Calidad</h1>
+  <p class="sub">Variables (X̄-R, X̄-S y capacidad de proceso) y atributos (p, np, c y u)</p>
  </div>
 </header>
-<nav class="nav" aria-label="Secciones">
- <a href="#datos">1 Datos</a><a href="#eleccion">2 Elección</a><a href="#graficos">3 Gráficos</a><a href="#capacidad">4 Capacidad</a><a href="#teoria">Fundamentos</a><a href="#refs">Referencias</a>
+<div class="maintabs noprint" id="mainTabs" role="tablist" aria-label="Tipo de control estadístico">
+ <button type="button" role="tab" id="tabV" data-panel="V" aria-selected="true"><b>Sección 1</b><span>Control estadístico de variables</span><small>Mediciones continuas: X̄-R, X̄-S, Cp, Cpk, Cpm</small></button>
+ <button type="button" role="tab" id="tabA" data-panel="A" aria-selected="false"><b>Sección 2</b><span>Control estadístico por atributos</span><small>Conteos: gráficos p, np, c y u</small></button>
+</div>
+
+<div id="panelVar" role="tabpanel" aria-labelledby="tabV">
+<nav class="nav" aria-label="Secciones de variables">
+ <a href="#datos">1 Datos</a><a href="#eleccion">2 Elección</a><a href="#graficos">3 Gráficos</a><a href="#capacidad">4 Capacidad</a><a href="#teoria">Fundamentos</a><a href="#refs">Referencias</a><button type="button" class="navswitch" data-panel="A">Atributos →</button>
 </nav>
 
 <div class="row noprint" style="margin-top:12px">
@@ -280,6 +302,120 @@ ol.refs li{margin:.5rem 0}
  </ol>
  <p class="note">Las constantes A₂, A₃, c₄, B₃, B₄, d₂, d₃, D₃ y D₄ son las de la tabla «Constantes para gráficos de control» (n = 2 a 25) que se usa en el curso. Verifique ediciones y páginas en su biblioteca antes de citar.</p>
 </section>
+</div>
+
+<div id="panelAtt" role="tabpanel" aria-labelledby="tabA" hidden>
+<nav class="nav" aria-label="Secciones de atributos">
+ <a href="#a-datos">1 Datos</a><a href="#a-eleccion">2 Elección</a><a href="#a-graficos">3 Gráficos</a><a href="#a-capacidad">4 Capacidad</a><a href="#a-teoria">Fundamentos</a><a href="#a-refs">Referencias</a><button type="button" class="navswitch" data-panel="V">← Variables</button>
+</nav>
+<div class="row noprint" style="margin-top:12px">
+ <button class="btn" id="btnPdfA" type="button">Descargar informe en PDF</button>
+ <label class="row note"><input type="checkbox" id="pdfTheoryA"> Incluir fundamentos y bibliografía</label>
+</div>
+<p class="note noprint" id="pdfMsgA">Se abre el cuadro de impresión del navegador: elija «Guardar como PDF» como destino. Funciona en la página publicada en GitHub; la vista previa dentro de Claude no permite imprimir.</p>
+<div class="po" id="printHeadA"></div>
+
+<section class="sec" id="a-datos">
+ <div class="sh"><span class="step">Paso 1</span><h2>Captura de datos por atributos</h2></div>
+ <div id="aExBanner" class="banner noprint" hidden></div>
+ <div class="card noprint">
+  <div class="fields">
+   <label class="f">Característica inspeccionada<input id="aVariable" type="text" placeholder="Ej. latas no conformes, defectos por tarjeta"></label>
+  </div>
+  <h3>¿Qué registró en cada muestra?</h3>
+  <div class="opts" id="aDtype" role="radiogroup" aria-label="Tipo de dato por atributos">
+   <label class="opt"><input type="radio" name="aDt" value="def" checked><span><b>Unidades defectuosas</b><small>Cada pieza se clasifica como conforme o no conforme. Gráficos p y np.</small></span></label>
+   <label class="opt"><input type="radio" name="aDt" value="dft"><span><b>Defectos (no conformidades)</b><small>Se cuentan los defectos y una pieza puede tener varios. Gráficos c y u.</small></span></label>
+  </div>
+  <div class="row" style="margin-top:12px">
+   <button class="btn" id="btnAddA" type="button">Agregar subgrupo</button>
+   <label class="row note">Ejemplo
+    <select id="aExSel" aria-label="Elegir ejemplo">
+     <option value="p">Gráfico p: latas de jugo, n = 50</option>
+     <option value="pv">Gráfico p: n variable (ilustrativo)</option>
+     <option value="c">Gráfico c: tarjetas de circuito</option>
+     <option value="u">Gráfico u: computadoras, n = 5</option>
+    </select></label>
+   <button class="btn sec2" id="btnExA" type="button">Cargar ejemplo</button>
+   <button class="btn sec2" id="btnPasteToggleA" type="button">Pegar desde Excel</button>
+   <button class="btn dng" id="btnClearA" type="button">Nuevo ejercicio (borrar todo)</button>
+  </div>
+  <div id="aPastePanel" hidden style="margin-top:12px">
+   <label class="f">Una fila por subgrupo con: etiqueta (opcional), n y el número observado. Con defectos y n constante basta el número observado.
+    <textarea id="aPasteTxt" rows="6" style="font-family:var(--mono)" placeholder="1&#9;50&#9;12&#10;2&#9;50&#9;15&#10;3&#9;50&#9;8"></textarea></label>
+   <div class="row" style="margin-top:8px">
+    <label class="row note"><input type="checkbox" id="aPasteLabel"> La primera columna es una etiqueta o número de subgrupo</label>
+    <label class="row note"><input type="checkbox" id="aPasteKeep"> Conservar el nombre de la característica</label>
+    <button class="btn" id="btnImportA" type="button">Importar y reemplazar datos</button>
+   </div>
+  </div>
+ </div>
+ <div id="aIssues"></div>
+ <div class="scroll" style="margin-top:12px"><table class="dt" id="tblA"></table></div>
+ <p class="note noprint">Marque «Excl.» para sacar un subgrupo del cálculo de los límites cuando haya identificado una causa asignable; seguirá visible en la gráfica con marcador hueco.</p>
+ <div class="row noprint"><button class="btn sec2" id="btnAutoExA" type="button">Excluir subgrupos fuera de control y recalcular</button><span class="note" id="aAutoExMsg"></span></div>
+ <h3>Estadísticos globales</h3>
+ <p class="note">Notación: <b>n</b> = unidades inspeccionadas en cada subgrupo (tamaño de muestra); <b>k</b> = número de subgrupos; <b>Σn</b> = total de unidades inspeccionadas; <b>d</b> = unidades defectuosas; <b>c</b> = defectos.</p>
+ <div class="tiles" id="aStats"></div>
+</section>
+
+<section class="sec" id="a-eleccion">
+ <div class="sh"><span class="step">Paso 2</span><h2>¿Qué gráfico conviene: p, np, c o u?</h2></div>
+ <div id="aVerdict"></div>
+</section>
+
+<section class="sec" id="a-graficos">
+ <div class="sh"><span class="step">Paso 3</span><h2>Gráfico de control por atributos</h2></div>
+ <div class="row noprint" style="margin-bottom:12px">
+  <b class="note">Gráfico a mostrar</b>
+  <div class="seg" id="aSeg" role="group" aria-label="Gráfico a mostrar"></div>
+  <span class="note" id="aSegHint"></span>
+ </div>
+ <div class="card noprint">
+  <div class="row"><label class="row note"><input type="checkbox" id="aZones" checked> Mostrar zonas de 1σ y 2σ</label></div>
+  <p class="note" style="margin-top:8px">Reglas de detección aplicadas (numeración de Nelson, 1984):</p>
+  <div class="row" id="aRulesBox">
+   <label class="row note"><input type="checkbox" data-r="1" checked> 1 · punto fuera de 3σ</label>
+   <label class="row note"><input type="checkbox" data-r="2" checked> 2 · 9 del mismo lado</label>
+   <label class="row note"><input type="checkbox" data-r="3" checked> 3 · 6 en tendencia</label>
+   <label class="row note"><input type="checkbox" data-r="4"> 4 · 14 alternando</label>
+   <label class="row note"><input type="checkbox" data-r="5" checked> 5 · 2 de 3 más allá de 2σ</label>
+   <label class="row note"><input type="checkbox" data-r="6" checked> 6 · 4 de 5 más allá de 1σ</label>
+  </div>
+  <p class="note">Con n variable, las reglas se evalúan sobre el valor estandarizado de cada punto, z = (valor − línea central) / σ del subgrupo.</p>
+ </div>
+ <div id="aOut"></div>
+</section>
+
+<section class="sec" id="a-capacidad">
+ <div class="sh"><span class="step">Paso 4</span><h2>Capacidad del proceso por atributos</h2></div>
+ <div id="aCap"></div>
+ <div class="row noprint" style="margin-top:12px"><button class="btn sec2" id="btnCopyA" type="button">Copiar resumen de resultados</button><span class="note" id="aCopyMsg"></span></div>
+ <textarea id="aSumBox" class="sumbox" hidden readonly aria-label="Resumen para copiar"></textarea>
+</section>
+
+<section class="sec" id="a-teoria">
+ <div class="sh"><span class="step">Referencia</span><h2>Fundamentos y explicación detallada</h2></div>
+ <div id="aTheory"></div>
+</section>
+
+<section class="sec" id="a-refs">
+ <div class="sh"><span class="step">Referencia</span><h2>Bibliografía</h2></div>
+ <ol class="refs">
+  <li>Montgomery, D. C. (2019). <i>Introduction to Statistical Quality Control</i> (8.ª ed.). Wiley. (Cap. 7: gráficos de control para atributos.)</li>
+  <li>Gutiérrez Pulido, H., y De la Vara Salazar, R. (2013). <i>Control estadístico de la calidad y Seis Sigma</i> (3.ª ed.). McGraw-Hill.</li>
+  <li>Besterfield, D. H. (2009). <i>Quality Control</i> (8.ª ed.). Pearson Prentice Hall.</li>
+  <li>Duncan, A. J. (1986). <i>Quality Control and Industrial Statistics</i> (5.ª ed.). Irwin.</li>
+  <li>Shewhart, W. A. (1931). <i>Economic Control of Quality of Manufactured Product</i>. Van Nostrand.</li>
+  <li>Nelson, L. S. (1984). The Shewhart control chart: Tests for special causes. <i>Journal of Quality Technology, 16</i>(4), 237–239.</li>
+  <li>Western Electric Company. (1956). <i>Statistical Quality Control Handbook</i>. Western Electric.</li>
+  <li>Wilson, E. B. (1927). Probable inference, the law of succession, and statistical inference. <i>Journal of the American Statistical Association, 22</i>(158), 209–212.</li>
+  <li>Wilson, E. B., y Hilferty, M. M. (1931). The distribution of chi-square. <i>Proceedings of the National Academy of Sciences, 17</i>(12), 684–688.</li>
+  <li>International Organization for Standardization. (2013). <i>ISO 7870-2:2013 Control charts — Part 2: Shewhart control charts</i>. ISO.</li>
+ </ol>
+ <p class="note">Los datos de los ejemplos p (latas de jugo), c (tarjetas de circuito) y u (computadoras) corresponden a los ejemplos clásicos de Montgomery (2019, cap. 7); verifique las cifras contra su edición. El ejemplo de n variable es ilustrativo.</p>
+</section>
+</div>
 </div>
 <script>
 (function(){'use strict';
@@ -730,6 +866,7 @@ function bind(){
 
 let _rs=null;
 function prepPrint(){
+ if(!$('panelAtt').hidden)return;
  const on=Object.keys(S.rules).filter(k=>S.rules[k]).join(', '),m=A&&A.ok?methodUsed():'',sp=[];
  if(S.lsl)sp.push('LIE = '+S.lsl);if(S.tgt)sp.push('T = '+S.tgt);if(S.usl)sp.push('LSE = '+S.usl);
  $('printHead').innerHTML='<div class="phead"><h1>Informe de control estadístico de variables</h1><p><b>Variable:</b> '+esc(S.variable||'sin nombre')+(S.unit?' ('+esc(S.unit)+')':'')+(A&&A.ok?' · n = '+A.n+' · k = '+A.act.length+' · n·k = '+A.N:'')+'</p><p><b>Especificaciones:</b> '+(sp.length?esc(sp.join(' · ')):'no capturadas')+(m?' · σ̂ estimada con '+(m==='R'?'R̄/d₂':'S̄/c₄'):'')+'</p><p><b>Reglas de detección activas (Nelson):</b> '+(on||'ninguna')+' · <b>Fecha:</b> '+new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'})+'</p></div>';
@@ -741,6 +878,373 @@ window.addEventListener('beforeprint',prepPrint);window.addEventListener('afterp
 $('btnPdf').addEventListener('click',()=>{try{window.print();}catch(e){$('pdfMsg').textContent='Este visor no permite imprimir. Abra la página publicada en GitHub y use este botón allí, o presione Ctrl+P.';}});
 
 load();syncControls();renderTheory();renderTable();bind();update();
+
+//#ATT-CORE-START
+function normInv(p){let lo=-10,hi=10;for(let i=0;i<80;i++){const m=(lo+hi)/2;if(Phi(m)<p)lo=m;else hi=m;}return (lo+hi)/2;}
+function wilsonCI(x,N){const z=1.959964,p=x/N,d=1+z*z/N,c=p+z*z/(2*N),h=z*Math.sqrt(p*(1-p)/N+z*z/(4*N*N));return[Math.max(0,(c-h)/d),Math.min(1,(c+h)/d)];}
+function poissonCI(X,N){const lo=X>0?wh(-1.959964,2*X)/2/N:0,hi=wh(1.959964,2*X+2)/2/N;return[lo,hi];}
+
+function attValid(T){
+ const rows=[],issues=[];
+ T.rows.forEach((r,i)=>{
+  const nr=String(r.n==null?'':r.n).trim(),xr=String(r.x==null?'':r.x).trim();
+  if(nr===''&&xr==='')return;
+  const n=(nr===''&&T.dtype==='dft')?1:num(nr),x=num(xr);let why='';
+  if(!Number.isFinite(n)||n<=0)why='falta el tamaño de muestra n (debe ser mayor que 0)';
+  else if(!Number.isFinite(x)||x<0)why='falta el número observado (0 o más)';
+  else if(!Number.isInteger(x))why='el número observado debe ser un entero';
+  else if(T.dtype==='def'&&!Number.isInteger(n))why='n debe ser un entero cuando se cuentan unidades';
+  else if(T.dtype==='def'&&x>n)why='las unidades defectuosas ('+x+') no pueden exceder n ('+n+')';
+  if(why){issues.push('Subgrupo '+(i+1)+': '+why+'.');return;}
+  rows.push({i,label:r.label||String(i+1),n,x,ex:!!r.ex});});
+ return{rows,issues};}
+
+function attRecommend(dtype,constN,R){
+ const nr=R.nmin===R.nmax?String(R.nmin):R.nmin+' a '+R.nmax;
+ if(dtype==='def')return constN?
+  {pick:'np',alt:'p',lvl:'Ambos son equivalentes',why:[
+   'Usted registró unidades defectuosas (cada pieza se clasifica como conforme o no conforme) y todas las muestras tienen el mismo tamaño, n = '+nr+'.',
+   'El gráfico np muestra directamente el número de defectuosas, sin calcular proporciones. El gráfico p muestra la fracción y da la misma información; es preferible cuando se quiere comunicar el resultado en porcentaje.']}:
+  {pick:'p',alt:null,lvl:'Recomendación sólida',why:[
+   'Usted registró unidades defectuosas y el tamaño de muestra cambia de un subgrupo a otro (n = '+nr+').',
+   'El gráfico p compara fracciones, que sí son comparables entre muestras de distinto tamaño, y ajusta los límites a cada n. El np no es válido: el número de defectuosas crece con el tamaño de la muestra.']};
+ return constN?
+  {pick:'c',alt:'u',lvl:'Ambos son equivalentes',why:[
+   'Usted registró defectos (una misma pieza puede tener varios) y la unidad de inspección tiene el mismo tamaño en todas las muestras (n = '+nr+').',
+   'El gráfico c grafica el número total de defectos por muestra y se basa en la distribución de Poisson. El gráfico u grafica defectos por unidad y da el mismo resultado cuando n es constante.']}:
+  {pick:'u',alt:null,lvl:'Recomendación sólida',why:[
+   'Usted registró defectos y el tamaño de la unidad de inspección (piezas, área o longitud) cambia entre muestras (n = '+nr+').',
+   'El gráfico u grafica defectos por unidad y ajusta los límites a cada tamaño. El c no es válido: el conteo de defectos crece con la cantidad inspeccionada.']};}
+
+function analyzeAtt(T){
+ const v=attValid(T),rows=v.rows,act=rows.filter(r=>!r.ex),R={dtype:T.dtype,rows,act,issues:v.issues,ok:act.length>=2,ch:{}};
+ if(!R.ok)return R;
+ R.k=act.length;R.N=act.reduce((s,r)=>s+r.n,0);R.X=act.reduce((s,r)=>s+r.x,0);R.nbar=R.N/R.k;
+ R.nmin=Math.min(...rows.map(r=>r.n));R.nmax=Math.max(...rows.map(r=>r.n));R.constN=R.nmax-R.nmin<1e-9;
+ R.pbar=R.X/R.N;R.cbar=R.X/R.k;R.rec=attRecommend(T.dtype,R.constN,R);
+ const pb=R.pbar,cb=R.cbar,n0=R.nmin,isDef=T.dtype==='def';
+ const mk=(key,valid,why,cl,fn)=>{const c={key,valid,why};
+  if(valid){c.cl=cl;c.val=[];c.ucl=[];c.lcl=[];c.sig=[];c.z=[];c.raw=[];
+   rows.forEach(r=>{const o=fn(r);c.val.push(o.v);c.ucl.push(o.u);c.lcl.push(o.l);c.sig.push(o.s);c.raw.push(o.r);c.z.push(o.s>0?(o.v-cl)/o.s:0);});
+   c.varLim=c.ucl.some(u=>Math.abs(u-c.ucl[0])>1e-12);
+   c.flags=evalRules(c.z,{cl:0,ucl:3,lcl:-3,sigma:1},T.rules,true);}
+  R.ch[key]=c;};
+ mk('p',isDef,'Solo aplica a unidades defectuosas.',pb,r=>{const s=Math.sqrt(pb*(1-pb)/r.n);return{v:r.x/r.n,u:Math.min(1,pb+3*s),l:Math.max(0,pb-3*s),r:pb-3*s,s};});
+ mk('np',isDef&&R.constN,isDef?'El gráfico np exige el mismo tamaño de muestra en todos los subgrupos.':'Solo aplica a unidades defectuosas.',n0*pb,r=>{const s=Math.sqrt(n0*pb*(1-pb));return{v:r.x,u:Math.min(n0,n0*pb+3*s),l:Math.max(0,n0*pb-3*s),r:n0*pb-3*s,s};});
+ mk('c',!isDef&&R.constN,!isDef?'El gráfico c exige que la unidad de inspección tenga el mismo tamaño en todas las muestras.':'Solo aplica al conteo de defectos.',cb,r=>{const s=Math.sqrt(cb);return{v:r.x,u:cb+3*s,l:Math.max(0,cb-3*s),r:cb-3*s,s};});
+ mk('u',!isDef,'Solo aplica al conteo de defectos.',pb,r=>{const s=Math.sqrt(pb/r.n);return{v:r.x/r.n,u:pb+3*s,l:Math.max(0,pb-3*s),r:pb-3*s,s};});
+ R.degenerate=isDef?(pb<=0||pb>=1):pb<=0;
+ return R;}
+
+function attFlagCount(R,key){const c=R.ch[key];if(!c||!c.valid)return 0;let n=0;R.rows.forEach((r,j)=>{if(!r.ex&&c.flags[j].length)n++;});return n;}
+
+function attCapacity(R){
+ const o={dtype:R.dtype};
+ if(R.dtype==='def'){const p=R.pbar;o.p=p;o.yield=(1-p)*100;o.ppm=p*1e6;o.ci=wilsonCI(R.X,R.N);
+  if(p>0&&p<1){o.z=normInv(1-p);o.sigma=o.z+1.5;}}
+ else{const u=R.pbar;o.u=u;o.cbar=R.cbar;o.p0=Math.exp(-u);o.ci=poissonCI(R.X,R.N);}
+ return o;}
+//#ATT-CORE-END
+
+//#ATT-RENDER
+const ATT_TITLE={p:'Gráfico p — fracción defectuosa de cada subgrupo',np:'Gráfico np — unidades defectuosas por subgrupo',c:'Gráfico c — defectos por muestra',u:'Gráfico u — defectos por unidad'};
+const ATT_YLAB={p:'Fracción defectuosa p',np:'Unidades defectuosas',c:'Defectos por muestra',u:'Defectos por unidad'};
+const ATT_DEC={p:4,np:2,c:2,u:3};
+const ATT_ALLOWED={def:['p','np'],dft:['c','u']};
+const fa=(x,d)=>Number.isFinite(x)?x.toFixed(d):'—';
+function attView(){const al=ATT_ALLOWED[SA.dtype];if(SA.view&&al.includes(SA.view))return SA.view;return AA&&AA.rec?AA.rec.pick:al[0];}
+
+function attChartSVG(o){
+ const W=980,H=330,mL=68,mR=92,mT=26,mB=48,m=o.val.length;if(!m)return'';
+ const mn=Math.min(...o.val,...o.lcl);let lo=mn,hi=Math.max(...o.val,...o.ucl);
+ const pad=(hi-lo)*0.08||Math.max(1,Math.abs(hi)*0.1);hi+=pad;lo-=pad;if(lo<0&&mn>=0)lo=0;
+ const pw=W-mL-mR,ph=H-mT-mB,hw=pw/m/2,X=i=>mL+(i+0.5)*pw/m,Y=v=>mT+(hi-Math.min(hi,Math.max(lo,v)))/(hi-lo)*ph,d=o.dec;
+ const step=a=>a.map((v,i)=>(X(i)-hw).toFixed(1)+','+Y(v).toFixed(1)+' '+(X(i)+hw).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+ let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(o.title)+'"><text class="tt" x="'+mL+'" y="16">'+esc(o.title)+'</text>';
+ niceTicks(lo,hi,5).forEach(t=>{s+='<line class="g" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+Y(t)+'" y2="'+Y(t)+'"/><text x="'+(mL-8)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+tickFmt(t,d)+'</text>';});
+ s+='<line class="ax" x1="'+mL+'" x2="'+mL+'" y1="'+mT+'" y2="'+(H-mB)+'"/><line class="ax" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+(H-mB)+'" y2="'+(H-mB)+'"/>';
+ if(o.zones)[-2,-1,1,2].forEach(z=>{const a=o.sig.map(g=>o.cl+z*g);if(a.every(v=>v<=lo||v>=hi))return;
+  s+='<polyline class="zn" fill="none" points="'+step(a)+'"/>';const e=a[m-1];if(e>lo&&e<hi)s+='<text x="'+(W-mR+6)+'" y="'+(Y(e)+4)+'" style="opacity:.7">'+(z>0?'+':'−')+Math.abs(z)+'σ</text>';});
+ const lab=(v,t)=>'<text x="'+(W-mR+6)+'" y="'+(Y(v)+(t==='LC'?-5:t==='LCS'?-5:12))+'" style="fill:var(--ink)">'+t+(o.varLim&&t!=='LC'?'':' '+o.fm(v))+'</text>';
+ s+='<polyline class="lim" fill="none" points="'+step(o.ucl)+'"/>'+lab(o.ucl[m-1],'LCS');
+ s+='<line class="cl" x1="'+mL+'" x2="'+(W-mR)+'" y1="'+Y(o.cl)+'" y2="'+Y(o.cl)+'"/>'+lab(o.cl,'LC');
+ s+='<polyline class="lim" fill="none" points="'+step(o.lcl)+'"/>'+lab(o.lcl[m-1],'LCI');
+ s+='<polyline class="pl" points="'+o.val.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ')+'"/>';
+ const ev=Math.ceil(m/20);
+ o.val.forEach((v,i)=>{const bad=o.flags[i].length>0,cl=bad?'pb':o.ex[i]?'px':'pt';
+  s+='<circle class="'+cl+'" cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="'+(bad?5.5:3.8)+'"/>';
+  if(bad)s+='<text class="rl" x="'+X(i).toFixed(1)+'" y="'+(Y(v)-9).toFixed(1)+'" text-anchor="middle">'+o.flags[i].join(',')+'</text>';
+  if(i%ev===0)s+='<text x="'+X(i).toFixed(1)+'" y="'+(H-mB+16)+'" text-anchor="middle">'+esc(String(o.labels[i]).slice(0,7))+'</text>';});
+ s+='<text x="'+(mL+pw/2)+'" y="'+(H-8)+'" text-anchor="middle">Subgrupo</text><text transform="translate(14,'+(mT+ph/2)+') rotate(-90)" text-anchor="middle">'+esc(o.ylab)+'</text></svg>';
+ return '<div class="chart">'+s+'</div>';}
+
+function renderAttStats(){
+ const g=$('aStats');
+ if(!AA||!AA.ok){g.innerHTML='<div class="banner warn" style="grid-column:1/-1">Capture al menos dos subgrupos completos para calcular.</div>';return;}
+ const t=(k,v)=>'<div class="tile"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>',ex=AA.rows.length-AA.act.length;
+ let h=t('Número de subgrupos k',AA.k+(ex?' <small>(+'+ex+' excl.)</small>':''))+t('Unidades inspeccionadas Σn',AA.N)+t('Tamaño de muestra n',AA.constN?AA.nmin:AA.nmin+' a '+AA.nmax);
+ if(AA.dtype==='def')h+=t('Defectuosas Σd',AA.X)+t('Fracción defectuosa p̄',fa(AA.pbar,4))+t('Porcentaje defectuoso',fa(AA.pbar*100,2)+' %')+t('Defectuosas por muestra np̄',fa(AA.cbar,2));
+ else h+=t('Defectos totales Σc',AA.X)+t('Defectos por muestra c̄',fa(AA.cbar,2))+t('Defectos por unidad ū',fa(AA.pbar,3));
+ g.innerHTML=h;}
+
+function renderAttVerdict(){
+ const el=$('aVerdict');if(!AA||!AA.ok){el.innerHTML='';return;}
+ const r=AA.rec,tr=(a,b,c,d,e)=>'<tr><td><b>'+a+'</b></td><td>'+b+'</td><td>'+c+'</td><td>'+d+'</td><td>'+e+'</td></tr>';
+ let h='<div class="verdict"><div class="vv">'+r.pick+'</div><div class="vk">Gráfico recomendado para sus datos · '+r.lvl+'</div><div><ul style="margin:0;padding-left:1.1rem">'+r.why.map(x=>'<li>'+x+'</li>').join('')+'</ul></div></div>';
+ h+='<div class="row noprint" style="margin-top:12px"><button type="button" class="btn" data-aview="'+r.pick+'">Ver gráfico '+r.pick+'</button>'+(r.alt?'<button type="button" class="btn sec2" data-aview="'+r.alt+'">Ver gráfico '+r.alt+'</button>':'')+'</div>';
+ h+='<h3>Defectuoso o defecto: cómo decidir</h3><div class="cmp"><div class="card"><b>Unidad defectuosa</b><p class="note">La pieza completa se juzga como conforme o no conforme y cuenta una sola vez. Ejemplos: una lata que gotea, un tubo fuera de medida. Gráficos p y np.</p></div><div class="card"><b>Defecto (no conformidad)</b><p class="note">Se cuentan las fallas individuales y una pieza puede tener varias. Ejemplos: soldaduras defectuosas en una tarjeta, rayones en un panel. Gráficos c y u.</p></div></div>';
+ h+='<h3>Guía para elegir el gráfico</h3><div class="scroll"><table><thead><tr><th>Gráfico</th><th>Qué se grafica</th><th>Dato</th><th>Tamaño de muestra</th><th>Modelo</th></tr></thead><tbody>'
+  +tr('p','Fracción defectuosa d/n','Unidades defectuosas','Constante o variable','Binomial')
+  +tr('np','Número de unidades defectuosas d','Unidades defectuosas','Debe ser constante','Binomial')
+  +tr('c','Número de defectos c por muestra','Defectos','Unidad de inspección constante','Poisson')
+  +tr('u','Defectos por unidad c/n','Defectos','Constante o variable','Poisson')+'</tbody></table></div>';
+ el.innerHTML=h;}
+
+function attLimitsTable(key){
+ const c=AA.ch[key],d=ATT_DEC[key],pb=AA.pbar,sub=!c.varLim,up=s=>s.replace('±','+'),dn=s=>s.replace('±','−');
+ const F={p:'p̄ ± 3√(p̄(1−p̄)/n)',np:'np̄ ± 3√(np̄(1−p̄))',c:'c̄ ± 3√c̄',u:'ū ± 3√(ū/n)'}[key];
+ const cen={p:['p̄ = Σd / Σn',AA.X+' / '+AA.N,fa(pb,4)],np:['np̄ = Σd / k',AA.X+' / '+AA.k,fa(c.cl,3)],c:['c̄ = Σc / k',AA.X+' / '+AA.k,fa(c.cl,3)],u:['ū = Σc / Σn',AA.X+' / '+AA.N,fa(pb,3)]}[key];
+ const n0=AA.nmin,P=fa(pb,4);
+ const S=!sub?'n varía: ver la tabla por subgrupo':{p:P+' ± 3 × √('+P+' × '+fa(1-pb,4)+' / '+n0+')',np:fa(c.cl,3)+' ± 3 × √('+fa(c.cl,3)+' × '+fa(1-pb,4)+')',c:fa(c.cl,3)+' ± 3 × √'+fa(c.cl,3),u:fa(pb,3)+' ± 3 × √('+fa(pb,3)+' / '+n0+')'}[key];
+ const r=(a,b,s,v)=>'<tr><td>'+a+'</td><td class="m">'+b+'</td><td class="m">'+s+'</td><td class="m"><b>'+v+'</b></td></tr>';
+ const lci=sub?(c.raw[0]<0?'0 <small>(el cálculo da '+fa(c.raw[0],d)+')</small>':fa(c.lcl[0],d)):'varía con n';
+ return '<h3>Cálculo de los límites</h3><div class="scroll"><table><thead><tr><th>Concepto</th><th>Fórmula</th><th>Sustitución</th><th>Valor</th></tr></thead><tbody>'
+  +r('Línea central',cen[0],cen[1],cen[2])
+  +r('LCS',up(F),sub?up(S):S,sub?fa(c.ucl[0],d):'varía con n')
+  +r('LC',key==='p'?'p̄':key==='np'?'np̄':key==='c'?'c̄':'ū','',fa(c.cl,d))
+  +r('LCI',dn(F),sub?dn(S):S,lci)+'</tbody></table></div><p class="note">Si el LCI calculado es negativo, se toma 0, porque un conteo no puede ser negativo.</p>';}
+
+function attRowsTable(key){
+ const c=AA.ch[key],d=ATT_DEC[key],isD=AA.dtype==='def',cap=isD?'d':'c';
+ let h='<h3>Valores por subgrupo</h3><div class="cscroll"><table class="ct"><thead><tr><th>Subgrupo</th><th>n</th><th>'+cap+'</th><th>'+(key==='p'?'p = d/n':key==='u'?'u = c/n':cap)+'</th><th>LCI</th><th>LCS</th><th>z</th><th>Reglas</th></tr></thead><tbody>';
+ AA.rows.forEach((r,j)=>{const fl=c.flags[j];
+  h+='<tr><td>'+esc(r.label)+(r.ex?'*':'')+'</td><td>'+r.n+'</td><td>'+r.x+'</td><td>'+fa(c.val[j],d)+'</td><td>'+fa(c.lcl[j],d)+'</td><td>'+fa(c.ucl[j],d)+'</td><td>'+fa(c.z[j],2)+'</td><td>'+(fl.length?'<span class="badge bad">'+fl.join(', ')+'</span>':'—')+'</td></tr>';});
+ return h+'</tbody></table></div>'+(AA.rows.some(r=>r.ex)?'<p class="note">* Subgrupo excluido del cálculo de los límites.</p>':'');}
+
+//#ATT-INTERP
+const ATT_CAUSE={
+ 1:{up:'Un aumento súbito de la no conformidad suele asociarse a materia prima fuera de especificación, ajuste o desgaste del equipo, cambio de operador o de método, o un criterio de inspección más estricto. Descarte primero un error de captura.',
+    dn:'Un descenso puede ser una mejora real (un cambio de proveedor o de método que convendría consolidar) o un error de inspección: instrumento mal calibrado, inspector menos estricto o conteo incompleto. Confírmelo antes de dar por buena la mejora.'},
+ 2:{up:'Un nivel sostenido por encima de la línea central indica que el promedio de no conformidad subió y se mantiene (nuevo lote, nuevo ajuste, cambio de turno).',
+    dn:'Un nivel sostenido por debajo de la línea central indica una mejora persistente, o un cambio en el criterio de inspección. Si es real, documente qué cambió para conservarlo.'},
+ 3:{up:'Una tendencia al alza sugiere deterioro gradual: desgaste de herramental, deriva del ajuste, fatiga del operador o agotamiento de un insumo.',
+    dn:'Una tendencia a la baja sugiere una mejora gradual (por ejemplo, el efecto de una capacitación) o una relajación progresiva del criterio de inspección.'},
+ 4:{'':'La alternancia sistemática sugiere dos fuentes que se turnan (máquinas, cavidades o turnos) o un muestreo que mezcla corrientes distintas.'},
+ 5:{up:'Es una señal temprana de que la no conformidad empieza a subir, antes de que algún punto cruce el límite.',dn:'Es una señal temprana de que la no conformidad empieza a bajar; confirme que no sea un cambio de inspección.'},
+ 6:{up:'Es una señal temprana y sostenida de aumento de la no conformidad.',dn:'Es una señal temprana y sostenida de descenso de la no conformidad.'}};
+
+function attFindings(c){
+ const m={};
+ AA.rows.forEach((r,j)=>c.flags[j].forEach(q=>{
+  let dir='';if(q===3)dir=(j>=5&&c.z[j]>c.z[j-5])?'up':'dn';else if(q!==4)dir=c.z[j]>0?'up':'dn';
+  const k=q+dir;(m[k]=m[k]||{q,dir,pts:[]}).pts.push(esc(r.label)+(r.ex?'*':''));}));
+ const ks=Object.keys(m);if(!ks.length)return '<p>Sin señales: ningún punto incumple las reglas activadas. El proceso se comporta como uno en estado de control estadístico.</p>';
+ let h='<ul>';ks.forEach(k=>{const o=m[k];h+='<li><b>Regla '+o.q+(o.dir?(o.dir==='up'?' (por encima)':' (por debajo)'):'')+':</b> '+RULETXT[o.q]+' en el subgrupo '+o.pts.join(', ')+'. <span class="note">'+ATT_CAUSE[o.q][o.dir]+'</span></li>';});
+ return h+'</ul>'+(AA.rows.some(r=>r.ex)?'<p class="note">* Subgrupo excluido del cálculo de los límites.</p>':'');}
+
+function attInterp(key){
+ const c=AA.ch[key],nb=attFlagCount(AA,key),isD=AA.dtype==='def';
+ let up=false,dn=false;AA.rows.forEach((r,j)=>{if(!r.ex&&c.flags[j].length){if(c.z[j]>0)up=true;else if(c.z[j]<0)dn=true;}});
+ let h='<div class="card interp"><h3 style="margin-top:0">Interpretación</h3>';
+ h+='<h4>1. Estabilidad del proceso '+(nb?'<span class="badge bad">Fuera de control</span>':'<span class="badge ok">Estable</span>')+'</h4>'+attFindings(c);
+ if(c.lcl.every(v=>v===0))h+='<p class="note">El límite inferior es 0 en todos los subgrupos: con este tamaño de muestra y este nivel de no conformidad el gráfico no puede detectar mejoras por puntos bajo el límite; solo lo harán las reglas de patrones.</p>';
+ h+='<h4>2. Conclusión</h4>';
+ if(!nb)h+='<div class="banner ok">El proceso está en control estadístico. Su nivel de '+(isD?'fracción defectuosa':'defectos')+' es estable y se puede tomar como la capacidad del proceso (paso 4). Para reducirlo ya no hay causas especiales que eliminar: hay que actuar sobre el sistema (materiales, método, máquina, medición).</div>';
+ else if(!up&&dn)h+='<div class="banner warn">Las señales están por debajo de la línea central, es decir, hay menos '+(isD?'defectuosas':'defectos')+' de lo habitual. Confirme que la mejora es real (y no un cambio en la inspección) y, si lo es, identifique qué cambió para conservarlo y recalcule los límites con los datos posteriores.</div>';
+ else h+='<div class="banner bad">El proceso no está en control estadístico. Investigue las causas asignables en los subgrupos señalados. Si las identifica y corrige, excluya esos subgrupos y recalcule los límites; no los excluya solo para «mejorar» la gráfica. Mientras tanto, '+(isD?'p̄':'ū')+' no describe un nivel de calidad predecible.</div>';
+ if(AA.k<20)h+='<p class="note">Con k = '+AA.k+' subgrupos los límites son estimaciones poco precisas; Montgomery (2019) recomienda al menos 20 a 25 subgrupos para la Fase I.</p>';
+ return h+'</div>';}
+
+function attAssumptions(key){
+ const c=AA.ch[key],isD=AA.dtype==='def',exp=key==='c'?AA.cbar:AA.nbar*AA.pbar,stable=attFlagCount(AA,key)===0;
+ const chk=(t,ok)=>'<tr><td>'+t+'</td><td><span class="badge '+(ok?'ok':'warn')+'">'+(ok?'Cumple':'Revisar')+'</span></td></tr>';
+ const lciPos=c.lcl.every(v=>v>0);
+ let need='';if(!lciPos){need=key==='p'||key==='np'?'Para que el LCI sea mayor que 0 se necesitaría n &gt; 9(1−p̄)/p̄ = '+fa(9*(1-AA.pbar)/AA.pbar,0)+' unidades por muestra.':key==='c'?'Para que el LCI sea mayor que 0 se necesitaría c̄ &gt; 9.':'Para que el LCI sea mayor que 0 se necesitaría n·ū &gt; 9 defectos esperados por muestra.';}
+ return '<h3>Verificación de supuestos</h3><div class="scroll"><table><tbody>'
+  +chk('Proceso estable en control estadístico',stable)
+  +chk('Al menos 20 subgrupos (k = '+AA.k+')',AA.k>=20)
+  +chk('Aproximación normal razonable: promedio esperado por muestra ≥ 5 ('+fa(exp,2)+')',exp>=5)
+  +chk('Límite inferior mayor que 0 (permite detectar disminuciones)',lciPos)+'</tbody></table></div>'
+  +'<p class="note">La regla de 5 es una guía práctica, no una prueba. '+need+' Se supone además que las unidades son independientes y que el criterio de inspección es el mismo en todas las muestras.</p>';}
+
+function renderAttOut(){
+ const out=$('aOut');
+ if(!AA||!AA.ok){out.innerHTML='<div class="banner warn">Capture al menos dos subgrupos completos.</div>';return;}
+ const key=attView(),c=AA.ch[key];
+ if(!c.valid){out.innerHTML='<div class="banner warn"><b>El gráfico '+key+' no está disponible para estos datos.</b> '+c.why+' Use el gráfico '+AA.rec.pick+'.</div>';return;}
+ const d=ATT_DEC[key];
+ let h='<h3 class="po">Gráfico '+key+'</h3>';
+ if(AA.degenerate)h+='<div class="banner bad">El nivel promedio es 0 o 100 %: no hay variación que graficar. Revise los datos.</div>';
+ h+=attChartSVG({title:ATT_TITLE[key],labels:AA.rows.map(r=>r.label),val:c.val,flags:c.flags,ex:AA.rows.map(r=>r.ex),cl:c.cl,ucl:c.ucl,lcl:c.lcl,sig:c.sig,zones:SA.zones,varLim:c.varLim,dec:d,fm:v=>fa(v,d),ylab:ATT_YLAB[key]});
+ if(c.varLim)h+='<p class="note">Los límites cambian de un subgrupo a otro porque n no es constante: a mayor n, límites más cercanos a la línea central.</p>';
+ out.innerHTML=h+attLimitsTable(key)+attRowsTable(key)+attInterp(key)+attAssumptions(key);}
+
+function renderAttCap(){
+ const el=$('aCap');if(!AA||!AA.ok){el.innerHTML='<div class="banner warn">Capture al menos dos subgrupos completos.</div>';return;}
+ const key=attView(),c=AA.ch[key];
+ if(!c.valid){el.innerHTML='<div class="banner warn">Elija un gráfico válido para estos datos en el paso 3.</div>';return;}
+ const stable=attFlagCount(AA,key)===0,cp=attCapacity(AA),isD=AA.dtype==='def',card=(t,v,n)=>'<div class="card"><div class="note"><b>'+t+'</b></div><div class="big">'+v+'</div><div class="note">'+n+'</div></div>';
+ let h='<div class="banner">En atributos no se comparan los datos con límites de especificación. Cuando el proceso es estable, su <b>capacidad es el propio nivel de no conformidad</b> ('+(isD?'la fracción defectuosa p̄':'los defectos por unidad ū')+'), que se compara con la meta del cliente o de la empresa (Montgomery, 2019).</div>';
+ h+=stable?'<div class="banner ok">El proceso es estable con el gráfico '+key+': el nivel estimado es una buena base para predecir.</div>':'<div class="banner bad">El proceso no es estable con el gráfico '+key+'. El nivel estimado mezcla periodos distintos y no debe usarse para predecir. Corrija las causas asignables en el paso 3.</div>';
+ const ci=cp.ci;
+ if(isD){
+  h+='<div class="cards">'+card('Fracción defectuosa p̄',fa(cp.p,4),'IC 95 % (Wilson): '+fa(ci[0],4)+' a '+fa(ci[1],4))
+   +card('Rendimiento (conformes)',fa(cp.yield,2)+' %','Complemento de p̄')
+   +card('Defectuosas por millón (ppm)',fa(cp.ppm,0),'p̄ × 1 000 000')
+   +card('Z de referencia',Number.isFinite(cp.z)?fa(cp.z,2):'—',Number.isFinite(cp.sigma)?'Nivel sigma con desplazamiento de 1.5σ (convención de Seis Sigma): '+fa(cp.sigma,2):'No definido')+'</div>';
+  h+='<div class="card interp" style="margin-top:12px"><h3 style="margin-top:0">Interpretación</h3><ul><li>De cada 1000 unidades, alrededor de <b>'+fa(cp.p*1000,1)+'</b> salen defectuosas (intervalo de confianza de 95 %: de '+fa(ci[0]*1000,1)+' a '+fa(ci[1]*1000,1)+').</li><li>Si la meta es una fracción defectuosa máxima, compare con el <b>extremo superior</b> del intervalo ('+fa(ci[1],4)+'): si aun así lo cumple, hay evidencia sólida.</li><li>Mejorar este nivel exige cambios en el sistema; ajustar el proceso por cada pieza mala solo agrega variación.</li></ul></div>';
+ }else{
+  h+='<div class="cards">'+card('Defectos por unidad ū',fa(cp.u,3),'IC 95 % (aprox. con χ²): '+fa(ci[0],3)+' a '+fa(ci[1],3))
+   +card('Defectos por muestra c̄',fa(cp.cbar,2),'Promedio de defectos en cada muestra')
+   +card('Unidad sin defectos',fa(cp.p0*100,1)+' %','e<sup>−ū</sup>, si los defectos siguen una distribución de Poisson')+'</div>';
+  h+='<div class="card interp" style="margin-top:12px"><h3 style="margin-top:0">Interpretación</h3><ul><li>En promedio se encuentran <b>'+fa(cp.u,3)+'</b> defectos por unidad inspeccionada.</li><li>Bajo el modelo de Poisson, cerca de <b>'+fa(cp.p0*100,1)+' %</b> de las unidades saldría sin ningún defecto.</li><li>Si los defectos se agrupan en pocas unidades, la distribución de Poisson no se cumple y esta estimación es optimista.</li></ul></div>';
+ }
+ el.innerHTML=h;}
+
+function attSummaryText(){
+ if(!AA||!AA.ok)return 'Sin datos suficientes.';
+ const key=attView(),c=AA.ch[key],L=[],d=ATT_DEC[key];
+ L.push('Característica: '+(SA.variable||'sin nombre')+' | dato: '+(AA.dtype==='def'?'unidades defectuosas':'defectos')+' | k = '+AA.k+', Σn = '+AA.N+', total observado = '+AA.X);
+ L.push('Gráfico recomendado: '+AA.rec.pick+' | gráfico mostrado: '+key);
+ if(c.valid){L.push('Línea central = '+fa(c.cl,d)+(c.varLim?' | límites variables (n no constante)':' | LCI = '+fa(c.lcl[0],d)+', LCS = '+fa(c.ucl[0],d)));
+  L.push('Subgrupos con señal: '+attFlagCount(AA,key));const cp=attCapacity(AA);
+  L.push(AA.dtype==='def'?'p̄ = '+fa(cp.p,4)+' ('+fa(cp.p*100,2)+' %), ppm = '+fa(cp.ppm,0):'ū = '+fa(cp.u,3)+' defectos por unidad, c̄ = '+fa(cp.cbar,2));}
+ return L.join('\n');}
+
+//#ATT-THEORY
+function renderAttTheory(){
+ const ac=(t,b,o)=>'<details class="acc"'+(o?' open':'')+'><summary>'+t+'</summary><div class="prose">'+b+'</div></details>';
+ $('aTheory').innerHTML=
+ ac('Variables y atributos: cuándo usar cada tipo de gráfico','<p>Una <b>variable</b> se mide en una escala continua (longitud, peso, temperatura) y se controla con gráficos X̄-R o X̄-S. Un <b>atributo</b> es una característica que se clasifica o se cuenta: la pieza es conforme o no, o se cuentan sus defectos. Se controla con gráficos p, np, c o u (Shewhart, 1931; Montgomery, 2019).</p><p>Los gráficos por atributos son útiles cuando medir es caro o imposible, o cuando varias características se resumen en un solo juicio de «aceptable» o «no aceptable». La contrapartida es que cada observación aporta menos información que una medición, por lo que se necesitan muestras mayores para detectar el mismo cambio.</p>',true)
+ +ac('Unidad defectuosa frente a defecto (no conformidad)','<p>Una <b>unidad defectuosa</b> (no conforme) es una pieza que incumple al menos un requisito, y se cuenta una sola vez sin importar cuántos incumplimientos tenga. Un <b>defecto</b> es cada incumplimiento individual; una pieza puede tener varios. Por eso las unidades defectuosas siguen un modelo binomial y los defectos, un modelo de Poisson (Montgomery, 2019).</p><p>Ejemplo: una tarjeta electrónica con tres soldaduras malas es una unidad defectuosa y tiene tres defectos.</p>')
+ +ac('Gráfico p (fracción defectuosa)','<p>Se grafica la fracción de unidades defectuosas en cada muestra, p = d/n. Si el proceso produce una fracción defectuosa constante p, el número de defectuosas d en una muestra de n sigue una distribución binomial con media np y varianza np(1−p).</p>'+FX('p̄ = Σd / Σn')+FX('LCS = p̄ + 3√( p̄(1−p̄) / n )  ·  LC = p̄  ·  LCI = p̄ − 3√( p̄(1−p̄) / n )')+'<p>Si el LCI sale negativo se toma 0. Con n variable, cada subgrupo tiene sus propios límites.</p>')
+ +ac('Gráfico np (número de defectuosas)','<p>Es el mismo gráfico p expresado en conteos, y exige que n sea constante.</p>'+FX('np̄ = Σd / k')+FX('LCS = np̄ + 3√( np̄(1−p̄) )  ·  LC = np̄  ·  LCI = np̄ − 3√( np̄(1−p̄) )'))
+ +ac('Gráfico c (defectos por muestra)','<p>Se grafica el número de defectos c en cada muestra, con la misma unidad de inspección en todas. Se supone que los defectos aparecen al azar e independientes, es decir, con distribución de Poisson, cuya media y varianza son iguales a c.</p>'+FX('c̄ = Σc / k')+FX('LCS = c̄ + 3√c̄  ·  LC = c̄  ·  LCI = c̄ − 3√c̄'))
+ +ac('Gráfico u (defectos por unidad)','<p>Se usa cuando el tamaño de la unidad de inspección cambia (número de piezas, área, longitud). Se grafica u = c/n, con n el tamaño de la unidad de inspección de esa muestra.</p>'+FX('ū = Σc / Σn')+FX('LCS = ū + 3√( ū / n )  ·  LC = ū  ·  LCI = ū − 3√( ū / n )'))
+ +ac('Tamaño de muestra variable','<p>Cuando n cambia, el error estándar también cambia, así que lo exacto es calcular límites propios para cada subgrupo, como hace esta aplicación. Una alternativa habitual es usar el n promedio cuando ningún n se aleja más de 25 % de él, y otra es graficar el valor estandarizado z = (valor − línea central)/σ con límites fijos en ±3 (Montgomery, 2019). Para las reglas de patrones, la aplicación usa z, que es la única forma de compararlos entre subgrupos de distinto tamaño.</p>')
+ +ac('Cuándo el límite inferior es mayor que cero','<p>Un LCI positivo es lo que permite detectar una mejora real con un solo punto. Para el gráfico p, el LCI es positivo cuando p̄ − 3√(p̄(1−p̄)/n) &gt; 0, es decir, cuando</p>'+FX('n &gt; 9(1 − p̄) / p̄')+'<p>Para el gráfico c se necesita c̄ &gt; 9, y para el u, n·ū &gt; 9. Si el nivel de defectos es muy bajo, esto exige muestras muy grandes; en ese caso el gráfico solo detecta empeoramientos mediante puntos fuera de límites.</p>')
+ +ac('Aproximación normal y límites probabilísticos','<p>Los límites de 3σ suponen que la distribución es aproximadamente normal. Con promedios esperados bajos (por ejemplo, menos de 5 defectos o defectuosas por muestra) la distribución binomial o de Poisson es claramente asimétrica y los límites de 3σ pueden dar más falsas alarmas por un lado que por otro. En esos casos se usan límites probabilísticos calculados con la distribución exacta, o muestras mayores (Montgomery, 2019).</p>')
+ +ac('Reglas para detectar patrones no aleatorios','<p>Se aplican las mismas reglas de Western Electric (1956) en la numeración de Nelson (1984) que en los gráficos de variables: punto fuera de 3σ, nueve del mismo lado, seis en tendencia, catorce alternando, dos de tres más allá de 2σ y cuatro de cinco más allá de 1σ. Con datos discretos y niveles bajos varios puntos coinciden en el mismo valor (por ejemplo, cero), por lo que conviene interpretar las rachas con cautela.</p>')
+ +ac('Capacidad del proceso en atributos','<p>No hay límites de especificación que comparar, porque cada unidad ya fue juzgada. Cuando el proceso está en control estadístico, su capacidad es el propio nivel de no conformidad: la fracción defectuosa p̄ (o los defectos por unidad ū). Se suele expresar como porcentaje, en partes por millón o como nivel sigma, y se compara con la meta del cliente. El intervalo de confianza muestra la incertidumbre de ese nivel: con pocas unidades inspeccionadas es amplio.</p>'+FX('Rendimiento = (1 − p̄) × 100 %  ·  ppm = p̄ × 10⁶  ·  Z = Φ⁻¹(1 − p̄)')+'<p>Para defectos, si siguen una distribución de Poisson, la probabilidad de que una unidad no tenga ningún defecto es e<sup>−ū</sup>.</p>')
+ +ac('Supuestos y limitaciones','<ul><li><b>Estabilidad:</b> sin control estadístico, el nivel estimado no es predecible.</li><li><b>Independencia:</b> las unidades deben ser independientes; los defectos agrupados rompen el modelo de Poisson.</li><li><b>Criterio de inspección:</b> debe ser el mismo en todas las muestras; un cambio de inspector o de criterio parece un cambio del proceso.</li><li><b>Tamaño de muestra:</b> con valores esperados menores de 5 por muestra, la aproximación normal es pobre.</li><li><b>Intervalos:</b> el de Wilson (1927) para p̄ y el basado en χ² para ū son aproximados.</li></ul>');}
+
+//#ATT-UI
+const ATT_KEY='spc-atributos-v1',PANEL_KEY='spc-panel';
+const mkRows=(ns,xs)=>xs.map((x,i)=>({label:String(i+1),n:String(Array.isArray(ns)?ns[i]:ns),x:String(x),ex:false}));
+const ATT_EX={
+ p:{dtype:'def',variable:'Latas de concentrado de jugo no conformes',view:'p',note:'30 muestras de 50 latas de concentrado de jugo, del ejemplo clásico de Montgomery (2019, cap. 7).',
+  rows:mkRows(50,[12,15,8,10,4,7,16,9,14,10,5,6,17,12,22,8,10,5,13,11,20,18,24,15,9,12,7,13,9,6])},
+ pv:{dtype:'def',variable:'Piezas no conformes con n variable',view:'p',note:'20 muestras con n entre 90 y 160 piezas. Los datos son ilustrativos (inventados) para mostrar límites variables.',
+  rows:mkRows([120,100,150,130,90,110,140,160,100,120,130,150,95,105,125,135,145,115,100,140],[6,5,8,6,5,6,7,8,5,6,7,18,5,5,6,7,7,6,5,7])},
+ c:{dtype:'dft',variable:'Defectos por muestra de tarjetas de circuito',view:'c',note:'26 muestras; cada una es un lote de 100 tarjetas de circuito, por lo que la unidad de inspección es 1 lote (n = 1). Del ejemplo clásico de Montgomery (2019, cap. 7).',
+  rows:mkRows(1,[21,24,16,12,15,5,28,20,31,25,20,24,16,19,10,17,13,22,18,39,30,24,16,19,17,15])},
+ u:{dtype:'dft',variable:'Defectos por computadora',view:'u',note:'20 muestras de 5 computadoras; se cuentan los defectos de cada muestra. Del ejemplo clásico de Montgomery (2019, cap. 7).',
+  rows:mkRows(5,[10,12,8,14,10,16,11,7,10,15,9,5,7,11,12,6,8,10,7,5])}};
+function attFromEx(k){const e=ATT_EX[k];return{dtype:e.dtype,variable:e.variable,view:e.view,zones:true,rules:{1:true,2:true,3:true,4:false,5:true,6:true},example:k,rows:JSON.parse(JSON.stringify(e.rows))};}
+let SA=attFromEx('p'),AA=null;
+function saveAtt(){try{localStorage.setItem(ATT_KEY,JSON.stringify(SA));}catch(e){}}
+function loadAtt(){try{const t=localStorage.getItem(ATT_KEY);if(!t)return;const o=JSON.parse(t);if(o&&Array.isArray(o.rows)&&(o.dtype==='def'||o.dtype==='dft')&&o.rules)SA=Object.assign(attFromEx('p'),o);}catch(e){}}
+function touchA(){SA.example=null;}
+
+function renderAttTable(){
+ const isD=SA.dtype==='def';
+ let h='<thead><tr><th class="c">#</th><th>Etiqueta</th><th>n</th><th>'+(isD?'Defectuosas d':'Defectos c')+'</th><th>'+(isD?'p = d/n':'u = c/n')+'</th><th class="c" title="Excluir del cálculo de límites">Excl.</th><th></th></tr></thead><tbody>';
+ SA.rows.forEach((r,i)=>{
+  h+='<tr data-i="'+i+'"><td class="c">'+(i+1)+'</td><td><input class="lab" data-f="label" value="'+esc(r.label)+'" aria-label="Etiqueta del subgrupo '+(i+1)+'"></td>'
+   +'<td><input class="v" inputmode="decimal" data-f="n" value="'+esc(r.n)+'" aria-label="Tamaño de muestra n del subgrupo '+(i+1)+'"></td>'
+   +'<td><input class="v" inputmode="numeric" data-f="x" value="'+esc(r.x)+'" aria-label="'+(isD?'Unidades defectuosas':'Defectos')+' del subgrupo '+(i+1)+'"></td>'
+   +'<td class="o" id="av'+i+'">—</td><td class="c"><input type="checkbox" data-f="ex"'+(r.ex?' checked':'')+' aria-label="Excluir subgrupo '+(i+1)+'"></td>'
+   +'<td><button type="button" class="x" data-f="del" title="Eliminar subgrupo" aria-label="Eliminar subgrupo '+(i+1)+'">×</button></td></tr>';});
+ $('tblA').innerHTML=h+'</tbody>';}
+
+function refreshAttRowStats(){
+ const map={};if(AA&&AA.rows)AA.rows.forEach(r=>{map[r.i]=r;});
+ SA.rows.forEach((r,i)=>{const e=$('av'+i),q=map[i];if(e)e.textContent=q?fa(q.x/q.n,SA.dtype==='def'?4:3):'—';});}
+function renderAttIssues(){const el=$('aIssues');
+ el.innerHTML=AA&&AA.issues&&AA.issues.length?'<div class="banner warn noprint"><b>Se ignoraron filas incompletas o inválidas:</b><ul style="margin:.3rem 0 0;padding-left:1.1rem">'+AA.issues.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>':'';}
+
+function applyAttView(){
+ const al=ATT_ALLOWED[SA.dtype],v=attView();
+ $('aSeg').innerHTML=al.map(k=>'<button type="button" data-aview="'+k+'" aria-pressed="'+(k===v)+'">'+k+'</button>').join('');
+ const rec=AA&&AA.rec?AA.rec.pick:'';
+ $('aSegHint').textContent=(!AA||!AA.ok)?'':(rec===v?'Es el gráfico recomendado para sus datos.':'El recomendado para sus datos es el '+rec+'.')+(AA.ch[v]&&!AA.ch[v].valid?' '+AA.ch[v].why:'');}
+
+function syncAttControls(){
+ $('aVariable').value=SA.variable||'';
+ document.querySelectorAll('#aDtype input').forEach(i=>{i.checked=i.value===SA.dtype;});
+ $('aZones').checked=!!SA.zones;
+ document.querySelectorAll('#aRulesBox input').forEach(c=>{c.checked=!!SA.rules[c.dataset.r];});
+ const b=$('aExBanner');b.hidden=!SA.example;
+ if(SA.example)b.innerHTML='Está viendo un ejemplo: '+ATT_EX[SA.example].note+' Cualquier cambio que haga reemplaza el modo de ejemplo.';}
+
+function updateAtt(){
+ AA=analyzeAtt(SA);renderAttStats();renderAttVerdict();applyAttView();renderAttOut();renderAttCap();refreshAttRowStats();renderAttIssues();
+ $('aExBanner').hidden=!SA.example;saveAtt();}
+
+function importAtt(){
+ const lines=$('aPasteTxt').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean),forceLab=$('aPasteLabel').checked,isN=t=>t!==''&&Number.isFinite(Number(t.replace(',','.')));
+ const rows=[];
+ lines.forEach(l=>{const tk=(/[\t;]/.test(l)?l.split(/[\t;]+/):l.split(/[,\s]+/)).map(t=>t.trim()).filter(t=>t!=='');if(!tk.length)return;
+  let lab='';const cnt=tk.filter(isN).length;
+  if(!isN(tk[0])||forceLab||cnt>=3)lab=tk.shift();
+  const v=tk.filter(isN);if(!v.length)return;
+  rows.push(v.length>=2?{label:lab,n:v[0],x:v[1],ex:false}:{label:lab,n:'',x:v[0],ex:false});});
+ if(!rows.length){$('aAutoExMsg').textContent='No se encontraron filas con números.';return;}
+ SA.rows=rows.map((r,i)=>({label:r.label||String(i+1),n:r.n,x:r.x,ex:false}));
+ if(!$('aPasteKeep').checked)SA.variable='';
+ SA.view='';touchA();$('aPastePanel').hidden=true;$('aAutoExMsg').textContent='';syncAttControls();renderAttTable();updateAtt();}
+
+function autoExcludeAtt(){
+ let rounds=0;const removed=[];
+ while(rounds++<10){const a=analyzeAtt(SA);if(!a.ok)break;const c=a.ch[attView()];if(!c||!c.valid)break;
+  const hit=[];a.rows.forEach((r,j)=>{if(!r.ex&&c.flags[j].includes(1))hit.push(r);});
+  if(!hit.length||a.act.length-hit.length<2)break;
+  hit.forEach(r=>{SA.rows[r.i].ex=true;removed.push(r.label);});}
+ touchA();renderAttTable();updateAtt();
+ $('aAutoExMsg').textContent=removed.length?'Excluidos: '+removed.join(', ')+'. Hágalo solo si identificó una causa asignable para cada uno.':'No hay puntos fuera de los límites que excluir.';}
+
+function showPanel(p,noScroll){
+ const a=p==='A';$('panelVar').hidden=a;$('panelAtt').hidden=!a;
+ $('tabV').setAttribute('aria-selected',String(!a));$('tabA').setAttribute('aria-selected',String(a));
+ try{localStorage.setItem(PANEL_KEY,p);}catch(e){}
+ if(!noScroll){const el=$('mainTabs');if(el&&el.scrollIntoView)el.scrollIntoView({block:'start'});}}
+
+function bindAtt(){
+ $('aVariable').addEventListener('input',e=>{SA.variable=e.target.value;touchA();updateAtt();});
+ $('aDtype').addEventListener('change',e=>{if(e.target.name==='aDt'){SA.dtype=e.target.value;SA.view='';touchA();renderAttTable();updateAtt();}});
+ $('aZones').addEventListener('change',e=>{SA.zones=e.target.checked;updateAtt();});
+ $('aRulesBox').addEventListener('change',e=>{if(e.target.dataset.r){SA.rules[e.target.dataset.r]=e.target.checked;updateAtt();}});
+ const t=$('tblA');
+ t.addEventListener('input',e=>{const tr=e.target.closest('tr[data-i]'),f=e.target.dataset.f;if(!tr||!f||f==='ex'||f==='del')return;SA.rows[+tr.dataset.i][f]=e.target.value;touchA();updateAtt();});
+ t.addEventListener('change',e=>{const tr=e.target.closest('tr[data-i]');if(tr&&e.target.dataset.f==='ex'){SA.rows[+tr.dataset.i].ex=e.target.checked;touchA();updateAtt();}});
+ t.addEventListener('click',e=>{const b=e.target.closest('button[data-f="del"]');if(!b)return;SA.rows.splice(+b.closest('tr').dataset.i,1);touchA();renderAttTable();updateAtt();});
+ $('btnAddA').addEventListener('click',()=>{const last=SA.rows[SA.rows.length-1];SA.rows.push({label:String(SA.rows.length+1),n:last?last.n:'',x:'',ex:false});touchA();renderAttTable();updateAtt();
+  const inp=t.querySelector('tr:last-child input[data-f="x"]');if(inp)inp.focus();});
+ $('btnExA').addEventListener('click',()=>{SA=attFromEx($('aExSel').value);syncAttControls();renderAttTable();updateAtt();$('aAutoExMsg').textContent='';});
+ $('btnClearA').addEventListener('click',()=>{SA.variable='';SA.view='';SA.rows=[];for(let i=0;i<5;i++)SA.rows.push({label:String(i+1),n:'',x:'',ex:false});SA.example=null;$('aAutoExMsg').textContent='';syncAttControls();renderAttTable();updateAtt();});
+ $('btnPasteToggleA').addEventListener('click',()=>{const p=$('aPastePanel');p.hidden=!p.hidden;});
+ $('btnImportA').addEventListener('click',importAtt);
+ $('btnAutoExA').addEventListener('click',autoExcludeAtt);
+ document.addEventListener('click',e=>{
+  const v=e.target.closest('button[data-aview]');if(v){SA.view=v.dataset.aview;updateAtt();if(v.closest('#aVerdict')){const g=$('a-graficos');if(g&&g.scrollIntoView)g.scrollIntoView({behavior:'smooth'});}return;}
+  const p=e.target.closest('[data-panel]');if(p)showPanel(p.dataset.panel);});
+ $('btnCopyA').addEventListener('click',async()=>{const tx=attSummaryText(),box=$('aSumBox');
+  try{await navigator.clipboard.writeText(tx);$('aCopyMsg').textContent='Resumen copiado.';box.hidden=true;}
+  catch(e){box.value=tx;box.hidden=false;box.focus();box.select();$('aCopyMsg').textContent='Seleccione y copie el texto de abajo.';}});
+ $('btnPdfA').addEventListener('click',()=>{try{window.print();}catch(e){$('pdfMsgA').textContent='Este visor no permite imprimir. Abra la página publicada en GitHub y use este botón allí, o presione Ctrl+P.';}});}
+
+let _ra=null;
+function attPrep(){
+ if($('panelAtt').hidden)return;
+ const key=attView(),on=Object.keys(SA.rules).filter(k=>SA.rules[k]).join(', ');
+ $('printHeadA').innerHTML='<div class="phead"><h1>Informe de control estadístico por atributos</h1><p><b>Característica:</b> '+esc(SA.variable||'sin nombre')+' · <b>Dato:</b> '+(SA.dtype==='def'?'unidades defectuosas':'defectos')+(AA&&AA.ok?' · k = '+AA.k+' · Σn = '+AA.N:'')+'</p><p><b>Gráfico mostrado:</b> '+key+(AA&&AA.ok?' · recomendado: '+AA.rec.pick:'')+' · <b>Reglas de detección activas (Nelson):</b> '+(on||'ninguna')+' · <b>Fecha:</b> '+new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'})+'</p></div>';
+ _ra={d:[]};
+ if($('pdfTheoryA').checked){document.body.classList.add('pr-theory');document.querySelectorAll('#aTheory details').forEach(d=>{_ra.d.push([d,d.open]);d.open=true;});}}
+function attEnd(){if(!_ra)return;_ra.d.forEach(x=>{x[0].open=x[1];});document.body.classList.remove('pr-theory');_ra=null;}
+window.addEventListener('beforeprint',attPrep);window.addEventListener('afterprint',attEnd);
+
+loadAtt();syncAttControls();renderAttTheory();renderAttTable();bindAtt();updateAtt();
+{let p='V';try{p=localStorage.getItem(PANEL_KEY)||'V';}catch(e){}showPanel(p==='A'?'A':'V',true);}
 })();
 </script>
 </body></html>
